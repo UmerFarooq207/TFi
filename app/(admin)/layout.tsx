@@ -1,13 +1,15 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import Image from "next/image"
+import { useRouter, usePathname } from "next/navigation"
 import {
   LayoutDashboard,
   Package,
   ShoppingCart,
   LogOut,
   ExternalLink,
+  Inbox,
 } from "lucide-react"
 import {
   SidebarProvider,
@@ -21,27 +23,41 @@ import {
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { useAuth } from "@/components/auth-provider"
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/admin/inquiries", label: "Inquiries", icon: Inbox },
 ]
 
 function AdminSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { user, logout } = useAuth()
+
+  const handleLogout = async () => {
+    await logout()
+    router.push("/login")
+    router.refresh()
+  }
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b border-sidebar-border px-4 py-5">
-        <div className="flex items-center gap-2">
-          <span className="font-heading text-lg font-medium text-sidebar-foreground tracking-wide">
-            TFi
-          </span>
+      <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
+        <Link href="/admin" className="flex items-center gap-2">
+          <Image
+            src="/assets/TFiLogo.png"
+            alt="TFi"
+            width={140}
+            height={140}
+            className="h-9 w-auto object-contain"
+          />
           <span className="text-[9px] tracking-[0.25em] uppercase text-sidebar-foreground/40 mt-0.5">
             Admin
           </span>
-        </div>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent className="pt-4">
@@ -69,6 +85,15 @@ function AdminSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border px-3 py-4 space-y-1">
+        {user && (
+          <div className="px-2 pb-3 space-y-1">
+            <p className="text-[9px] tracking-[0.22em] uppercase text-sidebar-foreground/40">
+              Signed in as
+            </p>
+            <p className="text-xs text-sidebar-foreground truncate">{user.name}</p>
+            <p className="text-[10px] text-sidebar-foreground/50 truncate">{user.email}</p>
+          </div>
+        )}
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
@@ -84,7 +109,10 @@ function AdminSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <button className="flex items-center gap-3 text-xs tracking-[0.15em] uppercase text-sidebar-foreground/50 hover:text-sidebar-foreground w-full">
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 text-xs tracking-[0.15em] uppercase text-sidebar-foreground/50 hover:text-sidebar-foreground w-full"
+              >
                 <LogOut size={14} />
                 Logout
               </button>

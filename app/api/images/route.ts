@@ -1,5 +1,6 @@
 import { connectToDatabase } from "@/lib/mongodb"
 import type { ProductImage } from "@/lib/models/product-image"
+import { requireAdmin } from "@/lib/auth"
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = new Set([
@@ -27,6 +28,10 @@ function resolveImageContentType(file: File): string | null {
 
 export async function POST(request: Request) {
   try {
+    const auth = await requireAdmin()
+    if (!auth.ok) {
+      return Response.json({ error: auth.error }, { status: auth.status })
+    }
     const formData = await request.formData()
     const file = formData.get("file")
 

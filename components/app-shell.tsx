@@ -10,6 +10,7 @@ import { CartDrawer } from "@/components/cart-drawer"
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isAdmin = pathname.startsWith("/admin")
+  const isAuthPage = pathname === "/login" || pathname === "/signup"
 
   useLayoutEffect(() => {
     document.documentElement.classList.toggle("admin-theme", isAdmin)
@@ -20,6 +21,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-0 flex-1 flex-col">{children}</div>
     )
+  }
+
+  if (isAuthPage) {
+    return <main className="flex-1">{children}</main>
   }
 
   return (

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server"
 import { connectToDatabase } from "@/lib/mongodb"
 import type { Order } from "@/lib/models/order"
+import { requireAdmin, requireUser } from "@/lib/auth"
 
 async function generateOrderNumber(db: Awaited<ReturnType<typeof connectToDatabase>>["db"]): Promise<string> {
   const year = new Date().getFullYear()
@@ -11,6 +12,10 @@ async function generateOrderNumber(db: Awaited<ReturnType<typeof connectToDataba
 
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAdmin()
+    if (!auth.ok) {
+      return Response.json({ error: auth.error }, { status: auth.status })
+    }
     const { db } = await connectToDatabase()
     const { searchParams } = request.nextUrl
 
@@ -42,6 +47,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireUser()
+    if (!auth.ok) {
+      return Response.json({ error: auth.error }, { status: auth.status })
+    }
+
     const { db } = await connectToDatabase()
     const body = await request.json()
 
@@ -50,6 +60,7 @@ export async function POST(request: NextRequest) {
 
     const order: Omit<Order, "_id"> = {
       orderNumber,
+      userId: auth.user.sub,
       customer: body.customer,
       items: body.items,
       subtotal: body.subtotal,

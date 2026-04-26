@@ -1,8 +1,13 @@
 import { connectToDatabase } from "@/lib/mongodb"
 import type { Order } from "@/lib/models/order"
+import { requireAdmin } from "@/lib/auth"
 
 export async function GET() {
   try {
+    const auth = await requireAdmin()
+    if (!auth.ok) {
+      return Response.json({ error: auth.error }, { status: auth.status })
+    }
     const { db } = await connectToDatabase()
 
     const [totalProducts, totalOrders, pendingOrders, revenueAgg] =

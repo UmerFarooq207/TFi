@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server"
 import { connectToDatabase } from "@/lib/mongodb"
 import type { Product } from "@/lib/models/product"
+import { requireAdmin } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,6 +38,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAdmin()
+    if (!auth.ok) {
+      return Response.json({ error: auth.error }, { status: auth.status })
+    }
     const { db } = await connectToDatabase()
     const body = await request.json()
 

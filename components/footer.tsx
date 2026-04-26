@@ -31,6 +31,9 @@ function IconLinkedin() {
 
 const navLinks = [
   { href: "/", label: "Home" },
+  { href: "/products", label: "Shop" },
+  { href: "/visualizer", label: "Visualizer" },
+  { href: "/calculator", label: "Calculator" },
   { href: "/services", label: "Services" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
@@ -50,7 +53,7 @@ export function Footer() {
           <div className="lg:col-span-2">
             <Link href="/" className="inline-flex">
               <Image
-                src="/assets/TFI.png"
+                src="/assets/TFiLogo.png"
                 alt="TFi Floors & Interiors"
                 width={200}
                 height={200}

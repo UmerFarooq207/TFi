@@ -18,6 +18,7 @@ export interface OrderItem {
 export interface Order {
   _id?: ObjectId | string
   orderNumber: string
+  userId?: string
   customer: {
     name: string
     email: string

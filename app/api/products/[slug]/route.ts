@@ -3,6 +3,7 @@ import { NextRequest } from "next/server"
 import { connectToDatabase } from "@/lib/mongodb"
 import type { Product } from "@/lib/models/product"
 import type { ProductImage } from "@/lib/models/product-image"
+import { requireAdmin } from "@/lib/auth"
 
 type Ctx = { params: Promise<{ slug: string }> }
 
@@ -48,6 +49,10 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
 
 export async function PUT(request: NextRequest, ctx: Ctx) {
   try {
+    const auth = await requireAdmin()
+    if (!auth.ok) {
+      return Response.json({ error: auth.error }, { status: auth.status })
+    }
     const { slug } = await ctx.params
     const { db } = await connectToDatabase()
     const body = await request.json()
@@ -82,6 +87,10 @@ export async function PUT(request: NextRequest, ctx: Ctx) {
 
 export async function DELETE(_req: NextRequest, ctx: Ctx) {
   try {
+    const auth = await requireAdmin()
+    if (!auth.ok) {
+      return Response.json({ error: auth.error }, { status: auth.status })
+    }
     const { slug } = await ctx.params
     const { db } = await connectToDatabase()
     const existing = await db.collection<Product>("products").findOne({ slug })

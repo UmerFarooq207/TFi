@@ -1,26 +1,158 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-playfair);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* TFi — Dark Luxury Palette */
+  --background: oklch(0.09 0.006 55);
+  --foreground: oklch(0.93 0.010 80);
+  --card: oklch(0.13 0.007 55);
+  --card-foreground: oklch(0.93 0.010 80);
+  --popover: oklch(0.13 0.007 55);
+  --popover-foreground: oklch(0.93 0.010 80);
+  --primary: oklch(0.93 0.010 80);
+  --primary-foreground: oklch(0.09 0.006 55);
+  --secondary: oklch(0.19 0.009 55);
+  --secondary-foreground: oklch(0.80 0.010 80);
+  --muted: oklch(0.17 0.008 55);
+  --muted-foreground: oklch(0.52 0.015 70);
+  --accent: oklch(0.72 0.095 75);
+  --accent-foreground: oklch(0.09 0.006 55);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.23 0.009 55);
+  --input: oklch(0.17 0.008 55);
+  --ring: oklch(0.72 0.095 75);
+  --radius: 0.25rem;
+  --chart-1: oklch(0.72 0.095 75);
+  --chart-2: oklch(0.60 0.080 75);
+  --chart-3: oklch(0.50 0.060 70);
+  --chart-4: oklch(0.40 0.040 65);
+  --chart-5: oklch(0.30 0.020 60);
+  --sidebar: oklch(0.11 0.006 55);
+  --sidebar-foreground: oklch(0.93 0.010 80);
+  --sidebar-primary: oklch(0.72 0.095 75);
+  --sidebar-primary-foreground: oklch(0.09 0.006 55);
+  --sidebar-accent: oklch(0.19 0.009 55);
+  --sidebar-accent-foreground: oklch(0.80 0.010 80);
+  --sidebar-border: oklch(0.23 0.009 55);
+  --sidebar-ring: oklch(0.72 0.095 75);
+}
+
+/* Admin panel — brand neutrals (class toggled on html via AppShell when path is /admin).
+ * Surface #F3F0EC / ink #212325. Tailwind maps --color-primary → var(--primary), so CTA uses --primary only.
+ * Reference tokens: --admin-surface, --admin-ink, --admin-border-subtle, --admin-muted-text */
+html.admin-theme {
+  --admin-surface: #f3f0ec;
+  --admin-ink: #212325;
+  --admin-border-subtle: rgba(33, 35, 37, 0.15);
+  --admin-muted-text: rgba(33, 35, 37, 0.65);
+
+  --background: #f3f0ec;
+  --foreground: #212325;
+  --card: #f3f0ec;
+  --card-foreground: #212325;
+  --popover: #ffffff;
+  --popover-foreground: #212325;
+  --primary: #212325;
+  --primary-foreground: #f3f0ec;
+  --secondary: rgba(33, 35, 37, 0.06);
+  --secondary-foreground: #212325;
+  --muted: rgba(33, 35, 37, 0.07);
+  --muted-foreground: rgba(33, 35, 37, 0.58);
+  --accent: rgba(33, 35, 37, 0.08);
+  --accent-foreground: #212325;
+  --destructive: #2a2424;
+  --destructive-foreground: #f3f0ec;
+  --border: rgba(33, 35, 37, 0.15);
+  --input: rgba(33, 35, 37, 0.14);
+  --ring: #212325;
+  --chart-1: #212325;
+  --chart-2: rgba(33, 35, 37, 0.55);
+  --chart-3: rgba(33, 35, 37, 0.4);
+  --chart-4: rgba(33, 35, 37, 0.28);
+  --chart-5: rgba(33, 35, 37, 0.16);
+
+  --sidebar: #212325;
+  --sidebar-foreground: #f3f0ec;
+  --sidebar-primary: #f3f0ec;
+  --sidebar-primary-foreground: #212325;
+  --sidebar-accent: rgba(243, 240, 236, 0.14);
+  --sidebar-accent-foreground: #f3f0ec;
+  --sidebar-border: rgba(243, 240, 236, 0.16);
+  --sidebar-ring: rgba(243, 240, 236, 0.4);
+}
+
+html.admin-theme table tbody tr:nth-child(even) {
+  background-color: rgba(33, 35, 37, 0.035);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  html.admin-theme [data-slot="input"],
+  html.admin-theme [data-slot="textarea"],
+  html.admin-theme [data-slot="select-trigger"] {
+    background-color: color-mix(in srgb, #ffffff 92%, #f3f0ec);
+  }
+
+  html.admin-theme [data-slot="button"][data-variant="default"]:hover {
+    background-color: color-mix(in srgb, #212325 82%, white);
+  }
 }

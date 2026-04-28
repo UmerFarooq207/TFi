@@ -4,28 +4,9 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { toast } from "sonner"
-import { Minus, Plus, ChevronRight } from "lucide-react"
-import { motion } from "framer-motion"
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { FadeIn } from "@/components/fade-in"
-import { ProductCard } from "@/components/product-card"
 import { toStoredImageUrl } from "@/lib/image-url"
 import { useCartStore } from "@/store/cart"
 import type { Product } from "@/lib/models/product"
-
-const CATEGORY_LABELS: Record<Product["category"], string> = {
-  flooring: "Flooring",
-  "wall-paneling": "Wall Paneling",
-  kitchen: "Kitchen",
-}
 
 interface ProductDetailProps {
   product: Product
@@ -40,186 +21,171 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
   function handleAddToCart() {
     addItem(product, quantity)
     toast.success(`${product.name} added to cart`, {
-      action: {
-        label: "View Cart",
-        onClick: toggleCart,
-      },
+      action: { label: "View Cart", onClick: toggleCart },
     })
   }
 
+  const sku = String(product._id ?? product.slug).slice(-4).toUpperCase()
+  const heroSrc = toStoredImageUrl(product.images[activeImage] ?? product.images[0])
+
   return (
     <>
-      {/* Breadcrumb */}
-      <div className="pt-24 pb-0 max-w-7xl mx-auto px-6 lg:px-10">
-        <nav className="flex items-center gap-1.5 text-[10px] tracking-wider uppercase text-muted-foreground/50">
-          <Link href="/" className="hover:text-muted-foreground transition-colors">Home</Link>
-          <ChevronRight size={10} />
-          <Link href="/products" className="hover:text-muted-foreground transition-colors">Products</Link>
-          <ChevronRight size={10} />
-          <span className="text-muted-foreground/80">{CATEGORY_LABELS[product.category]}</span>
-          <ChevronRight size={10} />
-          <span className="text-accent">{product.name}</span>
-        </nav>
+      <div className="tfi-topbar tfi-topbar--on-cream">
+        <span className="t-eyebrow">
+          <span className="diamond">◆</span>Product
+        </span>
+        <Link href="/contact" className="tfi-link">↳ Get a quote</Link>
       </div>
 
-      {/* Main detail */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-10 py-10 lg:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
-
-          {/* Left: carousel */}
-          <FadeIn>
-            <div className="space-y-4">
-              <Carousel className="w-full">
-                <CarouselContent>
-                  {product.images.map((src, i) => (
-                    <CarouselItem key={i}>
-                      <div className="relative aspect-[4/3] bg-secondary overflow-hidden">
-                        <Image
-                          src={toStoredImageUrl(src)}
-                          alt={`${product.name} — image ${i + 1}`}
-                          fill
-                          sizes="(max-width: 1024px) 100vw, 50vw"
-                          className="object-cover"
-                          priority={i === 0}
-                        />
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="left-3" />
-                <CarouselNext className="right-3" />
-              </Carousel>
-
-              {/* Thumbnail strip */}
-              <div className="flex gap-2">
-                {product.images.map((src, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveImage(i)}
-                    className={`relative w-16 h-12 shrink-0 overflow-hidden border transition-colors ${
-                      activeImage === i ? "border-accent" : "border-border/40 hover:border-border"
-                    }`}
-                  >
-                    <Image src={toStoredImageUrl(src)} alt="" fill sizes="64px" className="object-cover" />
-                  </button>
-                ))}
-              </div>
+      <section className="pd">
+        <div className="pd__grid">
+          <div>
+            <div className="pd__main" style={{ position: "relative" }}>
+              <Image
+                src={heroSrc}
+                alt={product.name}
+                fill
+                sizes="(max-width: 900px) 100vw, 60vw"
+                style={{ objectFit: "cover" }}
+                priority
+              />
             </div>
-          </FadeIn>
-
-          {/* Right: details */}
-          <div className="space-y-6">
-            <FadeIn delay={0.1}>
-              <Badge
-                variant="outline"
-                className="text-[9px] tracking-[0.22em] uppercase border-border/50 text-muted-foreground font-normal mb-2"
-              >
-                {CATEGORY_LABELS[product.category]} — {product.subcategory}
-              </Badge>
-              <h1 className="font-heading text-3xl md:text-4xl font-medium text-foreground leading-tight">
-                {product.name}
-              </h1>
-              <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-2xl font-medium text-foreground">
-                  PKR {product.price.toLocaleString("en-PK")}
-                </span>
-                <span className="text-sm text-muted-foreground">{product.unit}</span>
-              </div>
-            </FadeIn>
-
-            <FadeIn delay={0.15}>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {product.description}
-              </p>
-            </FadeIn>
-
-            {/* Specs */}
-            <FadeIn delay={0.2}>
-              <div className="border border-border/30 overflow-hidden">
-                {product.specs.map((spec, i) => (
-                  <div
-                    key={i}
-                    className={`grid grid-cols-2 text-sm ${
-                      i % 2 === 0 ? "bg-secondary/30" : "bg-transparent"
-                    }`}
-                  >
-                    <span className="px-4 py-2.5 text-muted-foreground/70 text-xs tracking-wide">
-                      {spec.key}
-                    </span>
-                    <span className="px-4 py-2.5 text-foreground/90 text-xs border-l border-border/20">
-                      {spec.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </FadeIn>
-
-            {/* Quantity + Add to cart */}
-            <FadeIn delay={0.25}>
-              {!product.inStock ? (
-                <div className="py-3 text-center border border-border/40 text-muted-foreground text-sm tracking-wider uppercase text-xs">
-                  Out of Stock
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-0">
-                    <button
-                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="w-10 h-10 flex items-center justify-center border border-border/60 text-muted-foreground hover:text-foreground hover:border-border transition-colors"
-                    >
-                      <Minus size={14} />
-                    </button>
-                    <span className="w-14 h-10 flex items-center justify-center border-t border-b border-border/60 text-sm tabular-nums">
-                      {quantity}
-                    </span>
-                    <button
-                      onClick={() => setQuantity((q) => q + 1)}
-                      className="w-10 h-10 flex items-center justify-center border border-border/60 text-muted-foreground hover:text-foreground hover:border-border transition-colors"
-                    >
-                      <Plus size={14} />
-                    </button>
-                  </div>
-
-                  <motion.div whileTap={{ scale: 0.98 }}>
-                    <Button
-                      onClick={handleAddToCart}
-                      className="w-full h-11 text-xs tracking-[0.2em] uppercase bg-accent text-accent-foreground hover:bg-accent/85 border-0"
-                    >
-                      Add to Cart
-                    </Button>
-                  </motion.div>
-
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="w-full h-10 text-xs tracking-[0.15em] uppercase border-border/50 text-muted-foreground hover:text-foreground"
-                  >
-                    <Link href="/contact">Request Custom Quote</Link>
-                  </Button>
-                </div>
-              )}
-            </FadeIn>
-          </div>
-        </div>
-      </section>
-
-      {/* Related products */}
-      {related.length > 0 && (
-        <section className="border-t border-border/40 py-20 lg:py-28">
-          <div className="max-w-7xl mx-auto px-6 lg:px-10">
-            <FadeIn>
-              <p className="text-xs tracking-[0.25em] uppercase text-muted-foreground mb-12">
-                You May Also Like
-              </p>
-            </FadeIn>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-14">
-              {related.map((p, i) => (
-                <ProductCard key={String(p._id)} product={p} index={i} />
+            <div className="pd__thumbs">
+              {product.images.slice(0, 5).map((src, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setActiveImage(i)}
+                  aria-label={`View image ${i + 1}`}
+                  style={{ position: "relative" }}
+                >
+                  <Image
+                    src={toStoredImageUrl(src)}
+                    alt=""
+                    fill
+                    sizes="120px"
+                    style={{ objectFit: "cover" }}
+                  />
+                </button>
               ))}
             </div>
           </div>
-        </section>
-      )}
+
+          <div>
+            <h1>
+              <span style={{ color: "var(--tfi-mute)", marginRight: 8, fontSize: "0.65em" }}>
+                {sku}
+              </span>
+              {product.name}
+            </h1>
+            <div className="pd__line">{product.subcategory}</div>
+            <span className="pd__tag">
+              {product.category === "flooring"
+                ? "Studio XL"
+                : product.category === "wall-paneling"
+                  ? "Atelier"
+                  : "Surfaces"}
+            </span>
+
+            <table className="pd__table">
+              {product.specs.length > 0 ? (
+                <tbody>
+                  {product.specs.map((spec, i) => (
+                    <tr key={i}>
+                      <td>{spec.key}</td>
+                      <td>{spec.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              ) : (
+                <tbody>
+                  <tr><td>Category</td><td>{product.category.replace("-", " ")}</td></tr>
+                  <tr><td>Subcategory</td><td>{product.subcategory}</td></tr>
+                  <tr><td>Unit</td><td>{product.unit}</td></tr>
+                  <tr><td>Warranty</td><td>Lifetime domestic · 15 yr commercial</td></tr>
+                  <tr><td>Certificates</td><td>FSC · CARB2 · ECOLABEL</td></tr>
+                </tbody>
+              )}
+            </table>
+
+            <div className="pd__price">
+              PKR {product.price.toLocaleString("en-PK")}
+              <small>{product.unit ? `${product.unit} · ex. tax` : "ex. tax"}</small>
+            </div>
+
+            <div className="pd__actions">
+              {product.inStock ? (
+                <>
+                  <div className="pd__qty">
+                    <button type="button" onClick={() => setQuantity((q) => Math.max(1, q - 1))}>−</button>
+                    <span>{quantity}</span>
+                    <button type="button" onClick={() => setQuantity((q) => q + 1)}>+</button>
+                  </div>
+                  <button type="button" className="tfi-pill" onClick={handleAddToCart}>
+                    <span className="arrow">↳</span>Add to cart
+                  </button>
+                  <Link href="/calculator" className="tfi-pill tfi-pill--outline">
+                    <span className="arrow">↳</span>Estimate
+                  </Link>
+                </>
+              ) : (
+                <div style={{
+                  padding: "10px 18px",
+                  border: "1px solid var(--tfi-line)",
+                  borderRadius: "9999px",
+                  fontSize: 11,
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  color: "var(--tfi-mute)",
+                }}>
+                  Out of stock
+                </div>
+              )}
+            </div>
+
+            <div className="pd__icons">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.5-7 10-7 10z"/></svg>
+              <Link href="/contact" className="pd__dist" style={{ marginLeft: "auto", textDecoration: "none" }}>
+                ↳ Find distributor
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {related.length > 0 && (
+          <div style={{ marginTop: 96 }}>
+            <span className="t-eyebrow" style={{ display: "block", marginBottom: 24, color: "var(--tfi-mute)" }}>
+              <span className="diamond">◆</span>You may also like
+            </span>
+            <div className="col-results">
+              {related.map((p) => {
+                const rsku = String(p._id ?? p.slug).slice(-4).toUpperCase()
+                return (
+                  <Link key={String(p._id)} href={`/products/${p.slug}`} className="col-card">
+                    <div className="col-card__img">
+                      <Image
+                        src={toStoredImageUrl(p.images[0])}
+                        alt={p.name}
+                        fill
+                        sizes="(max-width: 900px) 50vw, 30vw"
+                        style={{ objectFit: "cover" }}
+                      />
+                    </div>
+                    <div className="col-card__title">
+                      <span style={{ color: "var(--tfi-mute)", marginRight: 6 }}>{rsku}</span>
+                      {p.name}
+                    </div>
+                    <div className="col-card__sub">
+                      <span>{p.subcategory}</span>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </section>
     </>
   )
 }

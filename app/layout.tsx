@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono, Playfair_Display } from "next/font/google"
+import { Geist, Geist_Mono, Playfair_Display, Inter, Inter_Tight } from "next/font/google"
 import "./globals.css"
 import { AppShell } from "@/components/app-shell"
 import { Toaster } from "@/components/ui/sonner"
@@ -21,13 +21,25 @@ const playfairDisplay = Playfair_Display({
   weight: ["400", "500", "600", "700", "900"],
 })
 
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+})
+
+const interTight = Inter_Tight({
+  variable: "--font-inter-tight",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+})
+
 export const metadata: Metadata = {
   title: {
     default: "TFi — Floors & Interiors",
     template: "%s — TFi",
   },
   description:
-    "Premium flooring, wall paneling, and kitchen solutions for refined spaces. Crafted with intention.",
+    "Considered floors and panels for those who build with intent. Premium flooring, wall paneling, and surfaces.",
 }
 
 export default function RootLayout({
@@ -38,7 +50,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} ${inter.variable} ${interTight.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <AuthProvider>

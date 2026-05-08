@@ -6,7 +6,7 @@ import { hashPassword } from "@/lib/auth"
 const DEFAULT_ADMIN = {
   name: "TFi Admin",
   email: "admin@tfi.pk",
-  password: "Admin@12345",
+  password: "tfiadmin123",
 }
 
 export async function POST(request: NextRequest) {

@@ -2,12 +2,20 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Package, ShoppingCart, Clock, BadgePoundSterling, Plus, List } from "lucide-react"
+import {
+  Package,
+  ShoppingCart,
+  Clock,
+  Wallet,
+  Plus,
+  ArrowUpRight,
+  Inbox,
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { Order } from "@/lib/models/order"
 import { ADMIN_ORDER_STATUS_BADGE } from "@/lib/admin-status-badges"
+import { useAuth } from "@/components/auth-provider"
 
 interface Stats {
   totalProducts: number
@@ -17,6 +25,7 @@ interface Stats {
 }
 
 export default function AdminDashboard() {
+  const { user } = useAuth()
   const [stats, setStats] = useState<Stats | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -39,80 +48,105 @@ export default function AdminDashboard() {
       } else {
         setStats(null)
       }
-      setOrders(Array.isArray(ordersData) ? ordersData.slice(0, 5) : [])
+      setOrders(Array.isArray(ordersData) ? ordersData.slice(0, 6) : [])
       setLoading(false)
     }
     load()
   }, [])
 
+  const firstName = user?.name?.split(" ")[0] ?? "Admin"
+
   const statCards = [
-    { label: "Total Products", value: stats?.totalProducts, icon: Package },
-    { label: "Total Orders", value: stats?.totalOrders, icon: ShoppingCart },
-    { label: "Pending Orders", value: stats?.pendingOrders, icon: Clock },
+    { label: "Total Products", value: stats?.totalProducts, icon: Package, hint: "Live catalogue" },
+    { label: "Total Orders", value: stats?.totalOrders, icon: ShoppingCart, hint: "All time" },
+    { label: "Pending Orders", value: stats?.pendingOrders, icon: Clock, hint: "Awaiting action" },
     {
       label: "Total Revenue",
       value:
         stats != null
-          ? `PKR ${(stats.totalRevenue ?? 0).toLocaleString("en-PK")}`
+          ? `£${(stats.totalRevenue ?? 0).toLocaleString("en-GB")}`
           : undefined,
-      icon: BadgePoundSterling,
+      icon: Wallet,
+      hint: "Gross sales",
     },
   ]
 
   return (
-    <div className="space-y-10">
-      <div>
-        <p className="text-xs tracking-[0.28em] uppercase text-muted-foreground/50 mb-1">
-          Overview
-        </p>
-        <h1 className="font-heading text-2xl font-medium text-foreground">Dashboard</h1>
-      </div>
+    <div>
+      {/* ============ HEADER ============ */}
+      <header className="admin-page-head">
+        <div className="admin-page-head__lead">
+          <p className="admin-eyebrow">Overview</p>
+          <h1 className="admin-h1">
+            Welcome back, {firstName}<span className="accent">.</span>
+          </h1>
+          <p className="admin-page-head__sub">
+            A quiet snapshot of catalogue, orders, and inbound demand. Move with intent —
+            the rest of the operation is two clicks away.
+          </p>
+        </div>
+        <div className="admin-page-head__actions">
+          <Link href="/admin/products/new" className="admin-pill">
+            <Plus size={12} /> New Product
+          </Link>
+          <Link href="/admin/orders" className="admin-pill admin-pill--ghost">
+            All Orders <ArrowUpRight size={12} />
+          </Link>
+        </div>
+      </header>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* ============ STAT GRID ============ */}
+      <div className="admin-stats">
         {statCards.map((card) => (
-          <div key={card.label} className="border border-border/40 p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] tracking-[0.22em] uppercase text-muted-foreground/50">
-                {card.label}
-              </p>
-              <card.icon size={14} className="text-muted-foreground/30" />
+          <div key={card.label} className="admin-stat">
+            <div className="admin-stat__label">
+              <span>{card.label}</span>
+              <span className="admin-stat__icon">
+                <card.icon size={15} />
+              </span>
             </div>
             {loading ? (
-              <Skeleton className="h-7 w-20" />
+              <Skeleton className="h-9 w-28 mt-5" />
             ) : (
-              <p className="font-heading text-2xl font-medium text-foreground">
-                {card.value ?? "—"}
-              </p>
+              <div className="admin-stat__value">{card.value ?? "—"}</div>
             )}
+            <div className="admin-stat__hint">{card.hint}</div>
           </div>
         ))}
       </div>
 
-      {/* Quick links */}
-      <div className="flex gap-3">
-        <Button asChild size="sm" className="text-xs tracking-[0.15em] uppercase">
-          <Link href="/admin/products/new">
-            <Plus size={12} className="mr-1" /> Add Product
+      {/* ============ QUICK NAV CARDS ============ */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12">
+        {[
+          { href: "/admin/products", label: "Catalogue", desc: "Add, edit, and feature products on the public site.", icon: Package },
+          { href: "/admin/orders", label: "Orders", desc: "Confirm, track, and update fulfilment status.", icon: ShoppingCart },
+          { href: "/admin/inquiries", label: "Inquiries", desc: "Respond to customer messages and trade leads.", icon: Inbox },
+        ].map((card) => (
+          <Link
+            key={card.href}
+            href={card.href}
+            className="group relative bg-white border border-border/60 p-6 transition-all hover:border-foreground/40 hover:-translate-y-0.5"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <span className="inline-flex items-center justify-center w-10 h-10 bg-foreground/[0.06] text-foreground">
+                <card.icon size={17} />
+              </span>
+              <ArrowUpRight size={14} className="text-muted-foreground/40 group-hover:text-foreground transition-colors" />
+            </div>
+            <p className="text-base font-medium text-foreground tracking-tight">{card.label}</p>
+            <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{card.desc}</p>
           </Link>
-        </Button>
-        <Button
-          asChild
-          variant="outline"
-          size="sm"
-          className="text-xs tracking-[0.15em] uppercase border-border"
-        >
-          <Link href="/admin/orders">
-            <List size={12} className="mr-1" /> All Orders
-          </Link>
-        </Button>
+        ))}
       </div>
 
-      {/* Recent orders */}
-      <div>
-        <p className="text-[10px] tracking-[0.28em] uppercase text-muted-foreground/50 mb-5">
-          Recent Orders
-        </p>
+      {/* ============ RECENT ORDERS ============ */}
+      <section className="mt-14">
+        <div className="admin-section">
+          <h2>Recent Orders</h2>
+          <Link href="/admin/orders" className="admin-section__more">
+            View all ↗
+          </Link>
+        </div>
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -120,53 +154,41 @@ export default function AdminDashboard() {
             ))}
           </div>
         ) : orders.length === 0 ? (
-          <p className="text-sm text-muted-foreground/50 py-8 text-center border border-border/30">
-            No orders yet.
+          <p className="text-sm text-muted-foreground/60 py-16 text-center border border-dashed border-border/40 bg-white">
+            No orders yet — your first one will appear here.
           </p>
         ) : (
-          <div className="border border-border/40 overflow-hidden">
-            <table className="w-full text-xs">
+          <div className="admin-table-shell">
+            <table className="admin-table w-full text-xs">
               <thead>
-                <tr className="border-b border-border/40 bg-secondary/40">
-                  <th className="text-left px-4 py-3 text-foreground font-medium tracking-wider uppercase text-[9px]">
-                    Order #
-                  </th>
-                  <th className="text-left px-4 py-3 text-foreground font-medium tracking-wider uppercase text-[9px] hidden sm:table-cell">
-                    Customer
-                  </th>
-                  <th className="text-left px-4 py-3 text-foreground font-medium tracking-wider uppercase text-[9px] hidden md:table-cell">
-                    Items
-                  </th>
-                  <th className="text-left px-4 py-3 text-foreground font-medium tracking-wider uppercase text-[9px]">
-                    Total
-                  </th>
-                  <th className="text-left px-4 py-3 text-foreground font-medium tracking-wider uppercase text-[9px]">
-                    Status
-                  </th>
-                  <th className="text-left px-4 py-3 text-foreground font-medium tracking-wider uppercase text-[9px] hidden lg:table-cell">
-                    Date
-                  </th>
+                <tr>
+                  <th className="text-left px-6 py-4">Order #</th>
+                  <th className="text-left px-6 py-4 hidden sm:table-cell">Customer</th>
+                  <th className="text-left px-6 py-4 hidden md:table-cell">Items</th>
+                  <th className="text-left px-6 py-4">Total</th>
+                  <th className="text-left px-6 py-4">Status</th>
+                  <th className="text-left px-6 py-4 hidden lg:table-cell">Date</th>
                 </tr>
               </thead>
               <tbody>
                 {orders.map((order) => (
                   <tr
                     key={String(order._id)}
-                    className="border-b border-border/20 hover:bg-secondary/20 transition-colors"
+                    className="border-t border-border/30 hover:bg-foreground/[0.02] transition-colors"
                   >
-                    <td className="px-4 py-3 font-medium text-foreground/90">
+                    <td className="px-6 py-3.5 font-medium text-foreground/95">
                       {order.orderNumber}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">
+                    <td className="px-6 py-3.5 text-muted-foreground hidden sm:table-cell">
                       {order.customer.name}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
+                    <td className="px-6 py-3.5 text-muted-foreground hidden md:table-cell">
                       {order.items.length} item{order.items.length !== 1 ? "s" : ""}
                     </td>
-                    <td className="px-4 py-3 text-foreground/80">
-                      PKR {order.total.toLocaleString("en-PK")}
+                    <td className="px-6 py-3.5 text-foreground/85">
+                      £{order.total.toLocaleString("en-GB")}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-6 py-3.5">
                       <Badge
                         variant="outline"
                         className={`text-[9px] tracking-wider uppercase ${ADMIN_ORDER_STATUS_BADGE[order.status] ?? ""}`}
@@ -174,8 +196,8 @@ export default function AdminDashboard() {
                         {order.status}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground/50 hidden lg:table-cell">
-                      {new Date(order.createdAt).toLocaleDateString("en-PK")}
+                    <td className="px-6 py-3.5 text-muted-foreground/55 hidden lg:table-cell">
+                      {new Date(order.createdAt).toLocaleDateString("en-GB")}
                     </td>
                   </tr>
                 ))}
@@ -183,7 +205,7 @@ export default function AdminDashboard() {
             </table>
           </div>
         )}
-      </div>
+      </section>
     </div>
   )
 }

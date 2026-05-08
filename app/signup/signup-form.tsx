@@ -7,10 +7,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
-import { ArrowRight, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Loader2 } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 
 const schema = z.object({
@@ -59,82 +56,76 @@ export function SignupForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      <div className="space-y-2">
-        <Label htmlFor="name" className="text-xs tracking-[0.15em] uppercase text-muted-foreground">
-          Full Name
-        </Label>
-        <Input id="name" placeholder="Your name" autoComplete="name" {...register("name")} />
-        {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+    <form onSubmit={handleSubmit(onSubmit)} className="auth-form">
+      <div className="auth-form__field">
+        <label htmlFor="name" className="auth-form__label">Full name</label>
+        <input
+          id="name"
+          placeholder="Your name"
+          autoComplete="name"
+          className="auth-form__input"
+          {...register("name")}
+        />
+        {errors.name && <p className="auth-form__error">{errors.name.message}</p>}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="email" className="text-xs tracking-[0.15em] uppercase text-muted-foreground">
-          Email
-        </Label>
-        <Input
+      <div className="auth-form__field">
+        <label htmlFor="email" className="auth-form__label">Email</label>
+        <input
           id="email"
           type="email"
           placeholder="you@example.com"
           autoComplete="email"
+          className="auth-form__input"
           {...register("email")}
         />
-        {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+        {errors.email && <p className="auth-form__error">{errors.email.message}</p>}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="phone" className="text-xs tracking-[0.15em] uppercase text-muted-foreground">
-          Phone <span className="text-muted-foreground/50">(optional)</span>
-        </Label>
-        <Input
+      <div className="auth-form__field">
+        <label htmlFor="phone" className="auth-form__label">
+          Phone <span className="auth-form__label-hint">(optional)</span>
+        </label>
+        <input
           id="phone"
           type="tel"
           placeholder="+92 300 000 0000"
           autoComplete="tel"
+          className="auth-form__input"
           {...register("phone")}
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="password" className="text-xs tracking-[0.15em] uppercase text-muted-foreground">
-          Password
-        </Label>
-        <Input
+      <div className="auth-form__field">
+        <label htmlFor="password" className="auth-form__label">Password</label>
+        <input
           id="password"
           type="password"
           placeholder="At least 6 characters"
           autoComplete="new-password"
+          className="auth-form__input"
           {...register("password")}
         />
-        {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+        {errors.password && <p className="auth-form__error">{errors.password.message}</p>}
       </div>
 
-      {serverError && (
-        <p className="text-xs text-destructive border border-destructive/30 bg-destructive/10 px-3 py-2">
-          {serverError}
-        </p>
-      )}
+      {serverError && <p className="auth-form__server-error">{serverError}</p>}
 
-      <Button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full h-12 text-xs tracking-[0.2em] uppercase bg-accent text-accent-foreground hover:bg-accent/85 border-0 group disabled:opacity-60"
-      >
+      <button type="submit" disabled={isSubmitting} className="tfi-pill auth-form__submit">
         {isSubmitting ? (
           <>
-            <Loader2 size={14} className="animate-spin mr-2" /> Creating account…
+            <Loader2 size={14} className="auth-form__spinner" /> Creating account…
           </>
         ) : (
           <>
-            Create Account
-            <ArrowRight size={13} className="ml-1 group-hover:translate-x-1 transition-transform duration-200" />
+            <span className="arrow">↳</span>Create account
           </>
         )}
-      </Button>
+      </button>
 
-      <p className="text-xs text-center text-muted-foreground pt-3">
+      <p className="auth-form__footer">
         Already have an account?{" "}
-        <Link href="/login" className="text-accent hover:underline">
+        <Link href="/login" className="auth-form__link">
           Sign in
         </Link>
       </p>

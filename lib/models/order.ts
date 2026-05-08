@@ -15,6 +15,13 @@ export interface OrderItem {
   image: string
 }
 
+export interface OrderPromo {
+  code: string
+  type: "percent" | "fixed"
+  value: number
+  discount: number
+}
+
 export interface Order {
   _id?: ObjectId | string
   orderNumber: string
@@ -28,6 +35,8 @@ export interface Order {
   }
   items: OrderItem[]
   subtotal: number
+  discount?: number
+  promo?: OrderPromo
   total: number
   status: OrderStatus
   notes: string

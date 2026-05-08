@@ -37,7 +37,7 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
       typeof payload.sub === "string" &&
       typeof payload.email === "string" &&
       typeof payload.name === "string" &&
-      (payload.role === "admin" || payload.role === "customer")
+      payload.role === "admin"
     ) {
       return {
         sub: payload.sub,

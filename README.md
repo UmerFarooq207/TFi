@@ -18,6 +18,24 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## AI Room Visualizer (Python backend)
+
+The `/visualizer` page can call the FastAPI service in `../Visualizer` to apply real material textures onto a user-uploaded room photo.
+
+1. **Start the Python service** (in a separate terminal):
+
+   ```bash
+   cd ../Visualizer
+   pip install -r requirements.txt
+   uvicorn app.main:app --reload --port 8000
+   ```
+
+   The first run downloads the segmentation model (~500MB).
+
+2. **Set `VISUALIZER_API_URL`** in `.env.local` (defaults to `http://localhost:8000`).
+
+3. On the `/visualizer` page, click **Upload your room photo**, then pick any product swatch — the rendered AI preview replaces the CSS scene. The proxy lives at `app/api/visualize/route.ts` and forwards the request to `POST /api/v1/render` on the FastAPI service.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More

@@ -31,16 +31,14 @@ export const useCartStore = create<CartStore>()(
         const id = String(product._id)
         set((state) => {
           const existing = state.items.find((i) => String(i.product._id) === id)
-          if (existing) {
-            return {
-              items: state.items.map((i) =>
+          const items = existing
+            ? state.items.map((i) =>
                 String(i.product._id) === id
                   ? { ...i, quantity: i.quantity + quantity }
                   : i
-              ),
-            }
-          }
-          return { items: [...state.items, { product, quantity }] }
+              )
+            : [...state.items, { product, quantity }]
+          return { items, isOpen: true }
         })
       },
 
@@ -68,7 +66,7 @@ export const useCartStore = create<CartStore>()(
       getTotal: () =>
         get().items.reduce((sum, i) => sum + i.product.price * i.quantity, 0),
 
-      getItemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
+      getItemCount: () => get().items.length,
     }),
     {
       name: "tfi-cart",

@@ -8,8 +8,8 @@ import {
   Package,
   ShoppingCart,
   LogOut,
-  ExternalLink,
   Inbox,
+  Tag,
 } from "lucide-react"
 import {
   SidebarProvider,
@@ -30,6 +30,7 @@ const navItems = [
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { href: "/admin/inquiries", label: "Inquiries", icon: Inbox },
+  { href: "/admin/promos", label: "Promos", icon: Tag },
 ]
 
 function AdminSidebar() {
@@ -45,23 +46,21 @@ function AdminSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
-        <Link href="/admin" className="flex items-center gap-2">
+      <SidebarHeader className="border-b border-sidebar-border px-6 py-7">
+        <Link href="/admin" className="flex items-center justify-center">
           <Image
-            src="/assets/TFiLogo.png"
-            alt="TFi"
-            width={140}
-            height={140}
-            className="h-9 w-auto object-contain"
+            src="/assets/TFi-logo.png"
+            alt="TFi Floors & Interiors"
+            width={260}
+            height={100}
+            priority
+            className="h-14 w-auto object-contain"
           />
-          <span className="text-[9px] tracking-[0.25em] uppercase text-sidebar-foreground/40 mt-0.5">
-            Admin
-          </span>
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="pt-4">
-        <SidebarMenu>
+      <SidebarContent className="pt-8 px-2">
+        <SidebarMenu className="gap-1">
           {navItems.map((item) => {
             const active =
               item.href === "/admin"
@@ -69,12 +68,12 @@ function AdminSidebar() {
                 : pathname.startsWith(item.href)
             return (
               <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton asChild isActive={active}>
+                <SidebarMenuButton asChild isActive={active} className="h-11">
                   <Link
                     href={item.href}
-                    className="flex items-center gap-3 text-xs tracking-[0.15em] uppercase"
+                    className="flex items-center gap-3.5 text-[11px] tracking-[0.22em] uppercase font-semibold"
                   >
-                    <item.icon size={16} />
+                    <item.icon size={15} className="opacity-80" />
                     {item.label}
                   </Link>
                 </SidebarMenuButton>
@@ -84,36 +83,24 @@ function AdminSidebar() {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border px-3 py-4 space-y-1">
+      <SidebarFooter className="border-t border-sidebar-border px-3 py-5 space-y-2">
         {user && (
-          <div className="px-2 pb-3 space-y-1">
-            <p className="text-[9px] tracking-[0.22em] uppercase text-sidebar-foreground/40">
-              Signed in as
+          <div className="px-3 pb-2 space-y-1">
+            <p className="text-[9px] tracking-[0.32em] uppercase text-sidebar-foreground/40">
+              Signed in
             </p>
-            <p className="text-xs text-sidebar-foreground truncate">{user.name}</p>
-            <p className="text-[10px] text-sidebar-foreground/50 truncate">{user.email}</p>
+            <p className="text-sm text-sidebar-foreground truncate font-medium">{user.name}</p>
+            <p className="text-[10px] text-sidebar-foreground/55 truncate">{user.email}</p>
           </div>
         )}
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link
-                href="/"
-                target="_blank"
-                className="flex items-center gap-3 text-xs tracking-[0.15em] uppercase text-sidebar-foreground/50 hover:text-sidebar-foreground"
-              >
-                <ExternalLink size={14} />
-                View Site
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-3 text-xs tracking-[0.15em] uppercase text-sidebar-foreground/50 hover:text-sidebar-foreground w-full"
+                className="flex items-center gap-3 text-[10px] tracking-[0.24em] uppercase text-sidebar-foreground/60 hover:text-sidebar-foreground w-full"
               >
-                <LogOut size={14} />
+                <LogOut size={13} />
                 Logout
               </button>
             </SidebarMenuButton>
@@ -129,14 +116,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <SidebarProvider>
       <AdminSidebar />
       <SidebarInset>
-        {/* Top bar */}
-        <header className="flex shrink-0 items-center gap-3 h-14 border-b border-border bg-background px-4 text-foreground">
-          <SidebarTrigger className="text-foreground" />
-          <span className="text-xs text-muted-foreground tracking-wider uppercase">
-            TFi Admin Panel
-          </span>
+        <header className="admin-topbar">
+          <SidebarTrigger className="text-foreground -ml-1" />
         </header>
-        <main className="flex-1 p-6 lg:p-8">{children}</main>
+        <main className="flex-1 px-6 py-8 lg:px-12 lg:py-12">
+          <div className="admin-page">{children}</div>
+        </main>
       </SidebarInset>
     </SidebarProvider>
   )

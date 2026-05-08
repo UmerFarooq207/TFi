@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       name,
       email,
       passwordHash,
-      role: "customer",
+      role: "admin",
       phone,
       createdAt: now,
       updatedAt: now,

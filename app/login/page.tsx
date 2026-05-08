@@ -1,34 +1,60 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
+import Link from "next/link"
+import Image from "next/image"
 import { LoginForm } from "./login-form"
 
 export const metadata: Metadata = {
-  title: "Sign In",
+  title: "Admin Sign In",
 }
 
 export default function LoginPage() {
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-6 lg:px-10 py-24"
-      style={{
-        background:
-          "radial-gradient(ellipse 90% 70% at 20% 55%, oklch(0.18 0.018 60 / 0.7), transparent 60%), oklch(0.09 0.006 55)",
-      }}
-    >
-      <div className="w-full max-w-md">
-        <div className="mb-10 text-center space-y-3">
-          <p className="text-xs tracking-[0.3em] uppercase text-accent">Welcome back</p>
-          <h1 className="font-heading text-4xl font-medium text-foreground leading-[1] tracking-tight">
-            Sign in to TFi
-            <span className="block italic text-foreground/30 text-3xl mt-1">
-              continue your story
+    <div className="auth-shell">
+      <aside className="auth-shell__visual" aria-hidden>
+        <div className="auth-shell__image" />
+        <div className="auth-shell__visual-overlay" />
+        <div className="auth-shell__visual-inner">
+          <Link href="/" className="auth-shell__brand">
+            <Image
+              src="/assets/TFi-logo.png"
+              alt="TFi"
+              width={520}
+              height={200}
+              priority
+              style={{ width: "auto", height: "clamp(56px, 6vw, 84px)", objectFit: "contain" }}
+            />
+          </Link>
+          <div className="auth-shell__quote">
+            <span className="t-eyebrow auth-shell__quote-eyebrow">
+              <span className="diamond">◆</span>Floors &amp; Interiors
             </span>
-          </h1>
+            <p>Considered floors and panels for those who build with intent.</p>
+          </div>
         </div>
-        <Suspense fallback={null}>
-          <LoginForm />
-        </Suspense>
-      </div>
+      </aside>
+
+      <main className="auth-shell__main">
+        <div className="auth-shell__panel">
+          <Link href="/" className="auth-shell__back">
+            ↳ Back to site
+          </Link>
+          <header className="auth-shell__head">
+            <span className="t-eyebrow">
+              <span className="diamond">◆</span>Admin access
+            </span>
+            <h1 className="auth-shell__title">
+              Admin sign in<br />to continue.
+            </h1>
+            <p className="auth-shell__sub">
+              Restricted to TFi administrators. Manage products, orders, and inquiries.
+            </p>
+          </header>
+          <Suspense fallback={null}>
+            <LoginForm />
+          </Suspense>
+        </div>
+      </main>
     </div>
   )
 }

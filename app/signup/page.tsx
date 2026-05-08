@@ -1,4 +1,6 @@
 import type { Metadata } from "next"
+import Link from "next/link"
+import Image from "next/image"
 import { SignupForm } from "./signup-form"
 
 export const metadata: Metadata = {
@@ -7,25 +9,49 @@ export const metadata: Metadata = {
 
 export default function SignupPage() {
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-6 lg:px-10 py-24"
-      style={{
-        background:
-          "radial-gradient(ellipse 90% 70% at 20% 55%, oklch(0.18 0.018 60 / 0.7), transparent 60%), oklch(0.09 0.006 55)",
-      }}
-    >
-      <div className="w-full max-w-md">
-        <div className="mb-10 text-center space-y-3">
-          <p className="text-xs tracking-[0.3em] uppercase text-accent">Get started</p>
-          <h1 className="font-heading text-4xl font-medium text-foreground leading-[1] tracking-tight">
-            Create your account
-            <span className="block italic text-foreground/30 text-3xl mt-1">
-              shop with intention
+    <div className="auth-shell auth-shell--reverse">
+      <aside className="auth-shell__visual" aria-hidden>
+        <div className="auth-shell__image auth-shell__image--alt" />
+        <div className="auth-shell__visual-overlay" />
+        <div className="auth-shell__visual-inner">
+          <Link href="/" className="auth-shell__brand">
+            <Image
+              src="/assets/TFi-logo.png"
+              alt="TFi"
+              width={520}
+              height={200}
+              priority
+              style={{ width: "auto", height: "clamp(56px, 6vw, 84px)", objectFit: "contain" }}
+            />
+          </Link>
+          <div className="auth-shell__quote">
+            <span className="t-eyebrow auth-shell__quote-eyebrow">
+              <span className="diamond">◆</span>Material first
             </span>
-          </h1>
+            <p>Specified, fitted, and still standing — built for those who build with intent.</p>
+          </div>
         </div>
-        <SignupForm />
-      </div>
+      </aside>
+
+      <main className="auth-shell__main">
+        <div className="auth-shell__panel">
+          <Link href="/" className="auth-shell__back">
+            ↳ Back to site
+          </Link>
+          <header className="auth-shell__head">
+            <span className="t-eyebrow">
+              <span className="diamond">◆</span>Get started
+            </span>
+            <h1 className="auth-shell__title">
+              Create your<br />account.
+            </h1>
+            <p className="auth-shell__sub">
+              Save selections, unlock trade pricing, and follow your orders end to end.
+            </p>
+          </header>
+          <SignupForm />
+        </div>
+      </main>
     </div>
   )
 }

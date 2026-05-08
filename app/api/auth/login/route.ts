@@ -25,6 +25,10 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: "Invalid email or password" }, { status: 401 })
     }
 
+    if (user.role !== "admin") {
+      return Response.json({ error: "This sign-in is for administrators only" }, { status: 403 })
+    }
+
     const token = await signToken({
       sub: String(user._id),
       email: user.email,

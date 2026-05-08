@@ -11,6 +11,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isAdmin = pathname.startsWith("/admin")
   const isAuthPage = pathname === "/login" || pathname === "/signup"
+  const isVisualizer = pathname === "/visualizer"
   const isPublicTfi = !isAdmin && !isAuthPage
 
   useLayoutEffect(() => {
@@ -35,7 +36,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1">
         <PageTransition>{children}</PageTransition>
       </main>
-      <TfiFooter />
+      {!isVisualizer && <TfiFooter />}
       <TfiDock />
       <CartDrawer />
     </>

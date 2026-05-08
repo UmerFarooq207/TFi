@@ -10,16 +10,13 @@ function getSecret(): Uint8Array {
   return new TextEncoder().encode(secret)
 }
 
-type Role = "admin" | "customer"
+type Role = "admin"
 
 async function readSession(token: string | undefined): Promise<{ sub: string; role: Role } | null> {
   if (!token) return null
   try {
     const { payload } = await jwtVerify(token, getSecret())
-    if (
-      typeof payload.sub === "string" &&
-      (payload.role === "admin" || payload.role === "customer")
-    ) {
+    if (typeof payload.sub === "string" && payload.role === "admin") {
       return { sub: payload.sub, role: payload.role }
     }
     return null
@@ -40,14 +37,10 @@ export async function proxy(request: NextRequest) {
       url.searchParams.set("from", pathname + search)
       return NextResponse.redirect(url)
     }
-    if (session.role !== "admin") {
-      const url = new URL("/forbidden", request.url)
-      return NextResponse.redirect(url)
-    }
     return NextResponse.next()
   }
 
-  // Checkout — any authenticated user
+  // Checkout — admin only
   if (pathname === "/checkout") {
     if (!session) {
       const url = new URL("/login", request.url)
@@ -57,10 +50,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Auth pages — redirect logged-in users away
+  // Auth pages — redirect logged-in admins away
   if (pathname === "/login" || pathname === "/signup") {
     if (session) {
-      const url = new URL(session.role === "admin" ? "/admin" : "/", request.url)
+      const url = new URL("/admin", request.url)
       return NextResponse.redirect(url)
     }
     return NextResponse.next()

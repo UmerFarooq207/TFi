@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ProductForm } from "../../product-form"
 import type { Product } from "@/lib/models/product"
@@ -19,16 +20,22 @@ export default async function EditProductPage({
   if (!product) notFound()
 
   return (
-    <div className="space-y-8">
-      <div>
-        <p className="text-[10px] tracking-[0.28em] uppercase text-muted-foreground/50 mb-1">
-          Catalogue
-        </p>
-        <h1 className="font-heading text-2xl font-medium text-foreground">
-          Edit Product
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">{product.name}</p>
-      </div>
+    <div>
+      <Link href="/admin/products" className="admin-back">
+        ← Back to catalogue
+      </Link>
+      <header className="admin-page-head">
+        <div className="admin-page-head__lead">
+          <p className="admin-eyebrow">Catalogue · Edit</p>
+          <h1 className="admin-h1">
+            {product.name}<span className="accent">.</span>
+          </h1>
+          <p className="admin-page-head__sub">
+            {product.brand} · {product.category} · {product.collection}
+            {product.featured && <span className="ml-3 text-foreground/85">★ Featured</span>}
+          </p>
+        </div>
+      </header>
       <ProductForm product={product} />
     </div>
   )

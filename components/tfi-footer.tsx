@@ -1,18 +1,24 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import Image from "next/image"
+import { motion, useReducedMotion } from "framer-motion"
 
 function TfiMonogram() {
   return (
-    <svg viewBox="0 0 32 32" fill="#fff" stroke="#fff" strokeWidth={1.4}>
-      <path d="M16 3 L27 9 L27 23 L16 29 L5 23 L5 9 Z" fill="none" />
-      <path d="M11 12 L20 12 L23 16 L20 20 L11 20 L8 16 Z" />
-    </svg>
+    <Image
+      src="/assets/TFI-nav-footer.png"
+      alt="TFi"
+      width={320}
+      height={320}
+      style={{ width: 120, height: 120, objectFit: "contain" }}
+    />
   )
 }
 
 export function TfiFooter() {
   const ref = useRef<HTMLElement | null>(null)
+  const reduce = useReducedMotion()
 
   useEffect(() => {
     const node = ref.current
@@ -32,7 +38,7 @@ export function TfiFooter() {
           }
         }
       },
-      { threshold: 0.9 }, // fires when ~90% of footer is visible
+      { threshold: 0.9 },
     )
 
     obs.observe(node)
@@ -43,7 +49,7 @@ export function TfiFooter() {
   }, [])
 
   const handleScrollTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" })
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" })
   }
 
   return (
@@ -51,15 +57,20 @@ export function TfiFooter() {
       <div className="tfi-footer__logo">
         <TfiMonogram />
       </div>
-      <div className="tfi-watermark">TFi</div>
-      <button
+      <motion.button
         type="button"
         className="tfi-footer__up"
         onClick={handleScrollTop}
         aria-label="Back to top"
+        whileHover={reduce ? undefined : { y: -3, scale: 1.05 }}
+        whileTap={reduce ? undefined : { scale: 0.92 }}
+        transition={{ type: "spring", stiffness: 320, damping: 24 }}
       >
-        ↑
-      </button>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 19V5" />
+          <path d="M5 12l7-7 7 7" />
+        </svg>
+      </motion.button>
       <div className="tfi-footer__base">
         <div>
           ©2026, TFi &nbsp;·&nbsp;{" "}

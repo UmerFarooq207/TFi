@@ -4,18 +4,13 @@ import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { AnimatePresence, motion } from "framer-motion"
-import { Minus, Plus, X, ShoppingBag } from "lucide-react"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { Badge } from "@/components/ui/badge"
+import { Minus, Plus, X } from "lucide-react"
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { toStoredImageUrl } from "@/lib/image-url"
 import { useCartStore } from "@/store/cart"
+
+const fmt = (n: number) =>
+  `£${n.toLocaleString("en-GB", { maximumFractionDigits: 0 })}`
 
 export function CartDrawer() {
   const { items, isOpen, toggleCart, removeItem, updateQuantity, getTotal, getItemCount } =
@@ -29,150 +24,151 @@ export function CartDrawer() {
       <SheetContent
         side="right"
         showCloseButton={false}
-        className="w-full sm:max-w-md flex flex-col p-0 bg-background border-l border-border/50"
+        className="tfi-drawer"
       >
-        {/* Header */}
-        <SheetHeader className="flex flex-row items-center justify-between px-6 py-5 border-b border-border/40">
-          <div className="flex items-center gap-3">
-            <SheetTitle className="font-heading text-lg font-medium">Your Cart</SheetTitle>
-            {itemCount > 0 && (
-              <Badge className="bg-accent text-accent-foreground text-[10px] h-5 min-w-5 rounded-full px-1.5">
-                {itemCount}
-              </Badge>
-            )}
+        <header className="tfi-drawer__head">
+          <div>
+            <span className="tfi-drawer__eyebrow">
+              <span className="diamond">◆</span>Your selection
+            </span>
+            <SheetTitle className="tfi-drawer__title">
+              Cart {itemCount > 0 && <span className="tfi-drawer__count">· {itemCount}</span>}
+            </SheetTitle>
           </div>
           <button
+            type="button"
+            className="tfi-drawer__close"
             onClick={toggleCart}
-            className="text-muted-foreground hover:text-foreground transition-colors p-1"
             aria-label="Close cart"
           >
-            <X size={18} />
+            <X size={18} strokeWidth={1.6} />
           </button>
-        </SheetHeader>
+        </header>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="tfi-drawer__body">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full gap-4 py-16 text-center">
-              <ShoppingBag size={40} className="text-muted-foreground/30" />
-              <p className="font-heading text-xl font-medium text-foreground/60">
-                Your cart is empty
+            <div className="tfi-drawer__empty">
+              <div className="tfi-drawer__empty-mark" aria-hidden>◆</div>
+              <p className="tfi-drawer__empty-title">Nothing here yet.</p>
+              <p className="tfi-drawer__empty-copy">
+                Browse the collection — every plank, panel, and surface is built to be held
+                in hand before it's specified.
               </p>
-              <p className="text-sm text-muted-foreground">
-                Browse our collection to find something you love.
-              </p>
-              <Button
-                asChild
-                variant="outline"
-                size="sm"
-                className="mt-2 text-xs tracking-[0.15em] uppercase"
+              <Link
+                href="/products"
+                className="tfi-pill tfi-drawer__empty-cta"
                 onClick={toggleCart}
               >
-                <Link href="/products">Browse Products</Link>
-              </Button>
+                <span className="arrow">↳</span>Browse the collection
+              </Link>
             </div>
           ) : (
-            <AnimatePresence initial={false}>
-              {items.map((item) => (
-                <motion.div
-                  key={String(item.product._id)}
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="flex gap-4 py-4">
-                    {/* Thumbnail */}
-                    <div className="relative w-20 h-20 shrink-0 bg-secondary overflow-hidden">
-                      <Image
-                        src={toStoredImageUrl(item.product.images[0])}
-                        alt={item.product.name}
-                        fill
-                        sizes="80px"
-                        className="object-cover"
-                      />
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[9px] tracking-[0.22em] uppercase text-muted-foreground/60 mb-0.5">
-                        {item.product.category.replace("-", " ")}
-                      </p>
-                      <p className="text-sm font-medium text-foreground leading-snug truncate">
-                        {item.product.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        PKR {(item.product.price * item.quantity).toLocaleString("en-PK")}
-                      </p>
-
-                      {/* Qty controls */}
-                      <div className="flex items-center gap-2 mt-2">
-                        <button
-                          onClick={() =>
-                            updateQuantity(String(item.product._id), item.quantity - 1)
-                          }
-                          className="w-6 h-6 flex items-center justify-center border border-border/60 text-muted-foreground hover:text-foreground hover:border-border transition-colors"
-                          aria-label="Decrease quantity"
-                        >
-                          <Minus size={10} />
-                        </button>
-                        <span className="text-xs text-foreground w-4 text-center tabular-nums">
-                          {item.quantity}
+            <ul className="tfi-drawer__list">
+              <AnimatePresence initial={false}>
+                {items.map((item) => (
+                  <motion.li
+                    key={String(item.product._id)}
+                    layout
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
+                    className="tfi-drawer__row-wrap"
+                  >
+                    <article className="tfi-drawer__row">
+                      <Link
+                        href={`/products/${item.product.slug}`}
+                        onClick={toggleCart}
+                        className="tfi-drawer__thumb"
+                      >
+                        <Image
+                          src={toStoredImageUrl(item.product.images[0])}
+                          alt={item.product.name}
+                          fill
+                          sizes="96px"
+                        />
+                      </Link>
+                      <div className="tfi-drawer__info">
+                        <span className="tfi-drawer__cat">
+                          {item.product.category.replace(/-/g, " ")}
                         </span>
-                        <button
-                          onClick={() =>
-                            updateQuantity(String(item.product._id), item.quantity + 1)
-                          }
-                          className="w-6 h-6 flex items-center justify-center border border-border/60 text-muted-foreground hover:text-foreground hover:border-border transition-colors"
-                          aria-label="Increase quantity"
+                        <Link
+                          href={`/products/${item.product.slug}`}
+                          onClick={toggleCart}
+                          className="tfi-drawer__name"
                         >
-                          <Plus size={10} />
-                        </button>
+                          {item.product.name}
+                        </Link>
+                        <div className="tfi-drawer__row-foot">
+                          <div className="tfi-drawer__qty">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateQuantity(String(item.product._id), item.quantity - 1)
+                              }
+                              aria-label="Decrease quantity"
+                            >
+                              <Minus size={11} strokeWidth={1.8} />
+                            </button>
+                            <span>{item.quantity}</span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateQuantity(String(item.product._id), item.quantity + 1)
+                              }
+                              aria-label="Increase quantity"
+                            >
+                              <Plus size={11} strokeWidth={1.8} />
+                            </button>
+                          </div>
+                          <span className="tfi-drawer__price">
+                            {fmt(item.product.price * item.quantity)}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-
-                    {/* Remove */}
-                    <button
-                      onClick={() => removeItem(String(item.product._id))}
-                      className="text-muted-foreground/50 hover:text-foreground transition-colors self-start pt-0.5"
-                      aria-label="Remove item"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                  <Separator className="bg-border/30" />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+                      <button
+                        type="button"
+                        className="tfi-drawer__remove"
+                        onClick={() => removeItem(String(item.product._id))}
+                        aria-label={`Remove ${item.product.name}`}
+                      >
+                        <X size={14} strokeWidth={1.6} />
+                      </button>
+                    </article>
+                  </motion.li>
+                ))}
+              </AnimatePresence>
+            </ul>
           )}
         </div>
 
-        {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t border-border/40 px-6 py-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Subtotal</span>
-              <span className="text-base font-medium text-foreground">
-                PKR {total.toLocaleString("en-PK")}
-              </span>
+          <footer className="tfi-drawer__foot">
+            <div className="tfi-drawer__sub">
+              <span className="lbl">Subtotal</span>
+              <span className="val">{fmt(total)}</span>
             </div>
-            <Button
-              className="w-full h-11 text-xs tracking-[0.2em] uppercase bg-accent text-accent-foreground hover:bg-accent/85 border-0"
+            <p className="tfi-drawer__note">
+              Delivery and trade pricing calculated at checkout.
+            </p>
+            <button
+              type="button"
+              className="tfi-pill tfi-drawer__checkout"
               onClick={() => {
                 toggleCart()
-                router.push("/checkout")
+                router.push("/cart")
               }}
             >
-              Proceed to Checkout
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full h-9 text-xs tracking-[0.15em] uppercase text-muted-foreground hover:text-foreground"
+              <span className="arrow">↳</span>View cart
+            </button>
+            <button
+              type="button"
+              className="tfi-drawer__keep"
               onClick={toggleCart}
             >
-              Continue Shopping
-            </Button>
-          </div>
+              Keep browsing
+            </button>
+          </footer>
         )}
       </SheetContent>
     </Sheet>

@@ -1,11 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { ArrowLeft, ArrowRight, ChevronDown, ChevronUp } from "lucide-react"
 import { toast } from "sonner"
 import { toStoredImageUrl } from "@/lib/image-url"
 import { useCartStore } from "@/store/cart"
+import { CollectionCarousel } from "@/components/collection-carousel"
 import type { Product } from "@/lib/models/product"
 
 interface ProductDetailProps {
@@ -13,9 +15,33 @@ interface ProductDetailProps {
   related: Product[]
 }
 
+type DimDisplay = "mm" | "in"
+
+const MM_PER_INCH = 25.4
+const DESCRIPTION_PREVIEW_CHARS = 240
+
+function toMm(value: number, unit: Product["dimensions"]["unit"]): number {
+  switch (unit) {
+    case "mm": return value
+    case "cm": return value * 10
+    case "m":  return value * 1000
+    case "in": return value * MM_PER_INCH
+    default:   return value
+  }
+}
+
+function fmtDim(valueMm: number, display: DimDisplay): string {
+  if (display === "mm") return `${Math.round(valueMm)} mm`
+  return `${(valueMm / MM_PER_INCH).toFixed(2)} in`
+}
+
 export function ProductDetail({ product, related }: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1)
-  const [activeImage, setActiveImage] = useState(0)
+  const [dimDisplay, setDimDisplay] = useState<DimDisplay>("mm")
+  const [descExpanded, setDescExpanded] = useState(false)
+  const galleryRef = useRef<HTMLDivElement | null>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
   const { addItem, toggleCart } = useCartStore()
 
   function handleAddToCart() {
@@ -25,8 +51,49 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
     })
   }
 
-  const sku = String(product._id ?? product.slug).slice(-4).toUpperCase()
-  const heroSrc = toStoredImageUrl(product.images[activeImage] ?? product.images[0])
+  // ====== Description show-more logic ======
+  const description = product.description ?? ""
+  const isLongDesc = description.length > DESCRIPTION_PREVIEW_CHARS
+  const visibleDesc = !isLongDesc || descExpanded
+    ? description
+    : description.slice(0, DESCRIPTION_PREVIEW_CHARS).trimEnd() + "…"
+
+  // ====== Pill chips ======
+  const pillChips = useMemo(() => {
+    const out: string[] = []
+    if (product.dimensions?.thickness) {
+      out.push(`${Math.round(toMm(product.dimensions.thickness, product.dimensions.unit))}mm`)
+    }
+    if (product.pattern) out.push(product.pattern)
+    if (product.color) out.push(product.color)
+    for (const spec of product.specs ?? []) {
+      if (spec.value) out.push(spec.value)
+    }
+    return out
+  }, [product])
+
+  // ====== Gallery scroll buttons ======
+  useEffect(() => {
+    const el = galleryRef.current
+    if (!el) return
+    const update = () => {
+      setCanScrollLeft(el.scrollLeft > 4)
+      setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4)
+    }
+    update()
+    el.addEventListener("scroll", update, { passive: true })
+    window.addEventListener("resize", update)
+    return () => {
+      el.removeEventListener("scroll", update)
+      window.removeEventListener("resize", update)
+    }
+  }, [product.images.length])
+
+  function scrollGallery(dir: 1 | -1) {
+    const el = galleryRef.current
+    if (!el) return
+    el.scrollBy({ left: dir * el.clientWidth * 0.6, behavior: "smooth" })
+  }
 
   return (
     <>
@@ -37,155 +104,217 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
         <Link href="/contact" className="tfi-link">↳ Get a quote</Link>
       </div>
 
-      <section className="pd">
-        <div className="pd__grid">
-          <div>
-            <div className="pd__main" style={{ position: "relative" }}>
-              <Image
-                src={heroSrc}
-                alt={product.name}
-                fill
-                sizes="(max-width: 900px) 100vw, 60vw"
-                style={{ objectFit: "cover" }}
-                priority
-              />
-            </div>
-            <div className="pd__thumbs">
-              {product.images.slice(0, 5).map((src, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setActiveImage(i)}
-                  aria-label={`View image ${i + 1}`}
-                  style={{ position: "relative" }}
-                >
-                  <Image
-                    src={toStoredImageUrl(src)}
-                    alt=""
-                    fill
-                    sizes="120px"
-                    style={{ objectFit: "cover" }}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
+      {/* ============ HERO BLOCK ============ */}
+      <section className="pdv2-hero">
+        <h2 className="pdv2-collection">{product.collection}</h2>
+        <h1 className="pdv2-title">{product.name}</h1>
 
-          <div>
-            <h1>
-              <span style={{ color: "var(--tfi-mute)", marginRight: 8, fontSize: "0.65em" }}>
-                {sku}
-              </span>
-              {product.name}
-            </h1>
-            <div className="pd__line">{product.subcategory}</div>
-            <span className="pd__tag">
-              {product.category === "flooring"
-                ? "Studio XL"
-                : product.category === "wall-paneling"
-                  ? "Atelier"
-                  : "Surfaces"}
-            </span>
-
-            <table className="pd__table">
-              {product.specs.length > 0 ? (
-                <tbody>
-                  {product.specs.map((spec, i) => (
-                    <tr key={i}>
-                      <td>{spec.key}</td>
-                      <td>{spec.value}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              ) : (
-                <tbody>
-                  <tr><td>Category</td><td>{product.category.replace("-", " ")}</td></tr>
-                  <tr><td>Subcategory</td><td>{product.subcategory}</td></tr>
-                  <tr><td>Unit</td><td>{product.unit}</td></tr>
-                  <tr><td>Warranty</td><td>Lifetime domestic · 15 yr commercial</td></tr>
-                  <tr><td>Certificates</td><td>FSC · CARB2 · ECOLABEL</td></tr>
-                </tbody>
-              )}
-            </table>
-
-            <div className="pd__price">
-              PKR {product.price.toLocaleString("en-PK")}
-              <small>{product.unit ? `${product.unit} · ex. tax` : "ex. tax"}</small>
-            </div>
-
-            <div className="pd__actions">
-              {product.inStock ? (
-                <>
-                  <div className="pd__qty">
-                    <button type="button" onClick={() => setQuantity((q) => Math.max(1, q - 1))}>−</button>
-                    <span>{quantity}</span>
-                    <button type="button" onClick={() => setQuantity((q) => q + 1)}>+</button>
-                  </div>
-                  <button type="button" className="tfi-pill" onClick={handleAddToCart}>
-                    <span className="arrow">↳</span>Add to cart
-                  </button>
-                  <Link href="/calculator" className="tfi-pill tfi-pill--outline">
-                    <span className="arrow">↳</span>Estimate
-                  </Link>
-                </>
-              ) : (
-                <div style={{
-                  padding: "10px 18px",
-                  border: "1px solid var(--tfi-line)",
-                  borderRadius: "9999px",
-                  fontSize: 11,
-                  letterSpacing: "0.16em",
-                  textTransform: "uppercase",
-                  color: "var(--tfi-mute)",
-                }}>
-                  Out of stock
-                </div>
-              )}
-            </div>
-
-            <div className="pd__icons">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/></svg>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.5-7 10-7 10z"/></svg>
-              <Link href="/contact" className="pd__dist" style={{ marginLeft: "auto", textDecoration: "none" }}>
-                ↳ Find distributor
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {related.length > 0 && (
-          <div style={{ marginTop: 96 }}>
-            <span className="t-eyebrow" style={{ display: "block", marginBottom: 24, color: "var(--tfi-mute)" }}>
-              <span className="diamond">◆</span>You may also like
-            </span>
-            <div className="col-results">
-              {related.map((p) => {
-                const rsku = String(p._id ?? p.slug).slice(-4).toUpperCase()
-                return (
-                  <Link key={String(p._id)} href={`/products/${p.slug}`} className="col-card">
-                    <div className="col-card__img">
-                      <Image
-                        src={toStoredImageUrl(p.images[0])}
-                        alt={p.name}
-                        fill
-                        sizes="(max-width: 900px) 50vw, 30vw"
-                        style={{ objectFit: "cover" }}
-                      />
-                    </div>
-                    <div className="col-card__title">
-                      <span style={{ color: "var(--tfi-mute)", marginRight: 6 }}>{rsku}</span>
-                      {p.name}
-                    </div>
-                    <div className="col-card__sub">
-                      <span>{p.subcategory}</span>
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
+        {pillChips.length > 0 && (
+          <div className="pdv2-pills">
+            {pillChips.map((chip, i) => (
+              <span key={`${chip}-${i}`} className="pdv2-pill">{chip}</span>
+            ))}
           </div>
         )}
+
+        {description && (
+          <div className="pdv2-desc">
+            <p>{visibleDesc}</p>
+            {isLongDesc && (
+              <button
+                type="button"
+                className="pdv2-desc__toggle"
+                onClick={() => setDescExpanded((v) => !v)}
+              >
+                {descExpanded ? "SHOW LESS" : "SHOW MORE"}
+                {descExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* ============ INLINE BUY BAND ============ */}
+        <div className="pdv2-buy">
+          <div className="pdv2-buy__price">
+            <span className="pdv2-buy__amount">£{product.price.toLocaleString("en-GB")}</span>
+            <span className="pdv2-buy__unit">{product.unit ? `${product.unit} · ex. tax` : "ex. tax"}</span>
+          </div>
+          <div className="pdv2-buy__actions">
+            {product.inStock ? (
+              <>
+                <div className="pd__qty">
+                  <button type="button" onClick={() => setQuantity((q) => Math.max(1, q - 1))}>−</button>
+                  <span>{quantity}</span>
+                  <button type="button" onClick={() => setQuantity((q) => q + 1)}>+</button>
+                </div>
+                <button type="button" className="tfi-pill" onClick={handleAddToCart}>
+                  <span className="arrow">↳</span>Add to cart
+                </button>
+                <Link href={`/calculator?product=${product.slug}`} className="tfi-pill tfi-pill--outline">
+                  <span className="arrow">↳</span>Estimate
+                </Link>
+              </>
+            ) : (
+              <div className="pdv2-buy__oos">Out of stock</div>
+            )}
+          </div>
+        </div>
       </section>
+
+      {/* ============ GALLERY STRIP ============ */}
+      {product.images.length > 0 && (
+        <section className="pdv2-gallery">
+          <div className="pdv2-gallery__track" ref={galleryRef}>
+            {product.images.map((src, i) => (
+              <div key={i} className="pdv2-gallery__slide">
+                <Image
+                  src={toStoredImageUrl(src)}
+                  alt={`${product.name} — view ${i + 1}`}
+                  fill
+                  sizes="(max-width: 900px) 100vw, 50vw"
+                  style={{ objectFit: "cover" }}
+                  priority={i === 0}
+                />
+              </div>
+            ))}
+          </div>
+          {product.images.length > 1 && (
+            <>
+              <button
+                type="button"
+                className={`pdv2-gallery__nav pdv2-gallery__nav--left ${canScrollLeft ? "" : "is-disabled"}`}
+                onClick={() => scrollGallery(-1)}
+                aria-label="Previous image"
+                disabled={!canScrollLeft}
+              >
+                <ArrowLeft size={16} strokeWidth={1.6} />
+              </button>
+              <button
+                type="button"
+                className={`pdv2-gallery__nav pdv2-gallery__nav--right ${canScrollRight ? "" : "is-disabled"}`}
+                onClick={() => scrollGallery(1)}
+                aria-label="Next image"
+                disabled={!canScrollRight}
+              >
+                <ArrowRight size={16} strokeWidth={1.6} />
+              </button>
+            </>
+          )}
+        </section>
+      )}
+
+      {/* ============ TECHNICAL SPECIFICATIONS ============ */}
+      <section className="pdv2-tech">
+        <h2 className="pdv2-tech__title">TECHNICAL SPECIFICATIONS</h2>
+
+        {product.dimensions && (
+          <div className="pd-spec__toggle">
+            <span
+              className={dimDisplay === "mm" ? "is-active" : ""}
+              onClick={() => setDimDisplay("mm")}
+              role="button"
+              tabIndex={0}
+            >
+              MM
+            </span>
+            <button
+              type="button"
+              className={`pd-spec__switch ${dimDisplay === "in" ? "is-on" : ""}`}
+              onClick={() => setDimDisplay((d) => (d === "mm" ? "in" : "mm"))}
+              aria-label="Toggle units"
+            >
+              <span />
+            </button>
+            <span
+              className={dimDisplay === "in" ? "is-active" : ""}
+              onClick={() => setDimDisplay("in")}
+              role="button"
+              tabIndex={0}
+            >
+              IN
+            </span>
+          </div>
+        )}
+
+        {product.dimensions && (
+          <div className="pd-spec__size">
+            <p className="pd-spec__size-label">SIZE</p>
+            <p className="pd-spec__size-value">
+              {fmtDim(toMm(product.dimensions.width, product.dimensions.unit), dimDisplay)}
+              <span> × </span>
+              {fmtDim(toMm(product.dimensions.height, product.dimensions.unit), dimDisplay)}
+            </p>
+          </div>
+        )}
+
+        <div className="pd-spec__grid">
+          {product.dimensions && (
+            <>
+              <div className="pd-spec__row">
+                <p className="pd-spec__k">Width</p>
+                <p className="pd-spec__v">{fmtDim(toMm(product.dimensions.width, product.dimensions.unit), dimDisplay)}</p>
+              </div>
+              <div className="pd-spec__row">
+                <p className="pd-spec__k">Height</p>
+                <p className="pd-spec__v">{fmtDim(toMm(product.dimensions.height, product.dimensions.unit), dimDisplay)}</p>
+              </div>
+              <div className="pd-spec__row">
+                <p className="pd-spec__k">Thickness</p>
+                <p className="pd-spec__v">{fmtDim(toMm(product.dimensions.thickness, product.dimensions.unit), dimDisplay)}</p>
+              </div>
+            </>
+          )}
+
+          {product.package && (
+            <div className="pd-spec__row">
+              <p className="pd-spec__k">Package</p>
+              <p className="pd-spec__v">
+                {product.package.unitsPerPackage} {product.package.unitLabel}
+                {" / "}{product.package.areaPerPackage.toLocaleString("en-GB")} {product.package.areaUnit}
+                {" / "}{product.package.weightPerPackage.toLocaleString("en-GB")} {product.package.weightUnit}
+              </p>
+            </div>
+          )}
+
+          {product.pallet && (
+            <div className="pd-spec__row">
+              <p className="pd-spec__k">Pallet</p>
+              <p className="pd-spec__v">
+                {product.pallet.unitsPerPallet} {product.pallet.unitLabel}
+                {" / "}{product.pallet.areaPerPallet.toLocaleString("en-GB")} {product.pallet.areaUnit}
+              </p>
+            </div>
+          )}
+
+          {product.pattern && (
+            <div className="pd-spec__row">
+              <p className="pd-spec__k">Pattern</p>
+              <p className="pd-spec__v">{product.pattern}</p>
+            </div>
+          )}
+
+          {product.color && (
+            <div className="pd-spec__row">
+              <p className="pd-spec__k">Color</p>
+              <p className="pd-spec__v">{product.color}</p>
+            </div>
+          )}
+
+          {product.specs?.map((spec, i) => (
+            <div key={i} className="pd-spec__row">
+              <p className="pd-spec__k">{spec.key}</p>
+              <p className="pd-spec__v">{spec.value}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ============ COLLECTION CAROUSEL ============ */}
+      <CollectionCarousel
+        products={related}
+        currentSlug={product.slug}
+        title="You may also like…"
+      />
     </>
   )
 }

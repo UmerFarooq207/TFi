@@ -35,13 +35,15 @@ const links = [
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
   const { toggleCart, getItemCount } = useCartStore()
-  const itemCount = getItemCount()
+  const itemCount = mounted ? getItemCount() : 0
   const { user, loading, logout } = useAuth()
 
   useEffect(() => {
+    setMounted(true)
     const handleScroll = () => setScrolled(window.scrollY > 48)
     handleScroll()
     window.addEventListener("scroll", handleScroll, { passive: true })

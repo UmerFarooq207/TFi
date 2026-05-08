@@ -2,12 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
+import { Reveal, FadeUp, StaggerGroup, StaggerItem } from "@/components/reveal"
+import { TfiCartButton } from "@/components/tfi-cart-button"
 import { useCartStore } from "@/store/cart"
 import type { Product } from "@/lib/models/product"
 
 const fmt = (n: number) =>
-  `PKR ${n.toLocaleString("en-PK", { maximumFractionDigits: 0 })}`
+  `£${n.toLocaleString("en-GB", { maximumFractionDigits: 0 })}`
 
 const WASTAGE_OPTIONS = [
   { value: 0.05, label: "+5% (straight lay)" },
@@ -16,27 +19,52 @@ const WASTAGE_OPTIONS = [
 ]
 
 const UNDERLAY_OPTIONS = [
-  { value: 0,   label: "None" },
-  { value: 600, label: "Standard (PKR 600/m²)" },
-  { value: 1200, label: "Acoustic (PKR 1,200/m²)" },
+  { value: 0,    label: "None" },
+  { value: 600,  label: "Standard (£600/m²)" },
+  { value: 1200, label: "Acoustic (£1,200/m²)" },
 ]
 
 const FITTING_OPTIONS = [
   { value: 0,    label: "Supply only" },
-  { value: 2200, label: "Supply + fit (PKR 2,200/m²)" },
-  { value: 3400, label: "Supply + fit + finish (PKR 3,400/m²)" },
+  { value: 2200, label: "Supply + fit (£2,200/m²)" },
+  { value: 3400, label: "Supply + fit + finish (£3,400/m²)" },
+]
+
+const STEPS = [
+  {
+    title: "Pick your material",
+    copy: "Choose a floor, panel, or surface from the live catalogue. Pricing updates instantly.",
+  },
+  {
+    title: "Tell us the room",
+    copy: "Length × width in metres. We add wastage, underlay, and fitting based on the layout.",
+  },
+  {
+    title: "Get a binding quote",
+    copy: "Send the result to our trade team — we'll factor in the subfloor, access, and delivery.",
+  },
+]
+
+const FAQS = [
+  { q: "Is this estimate binding?",            a: "It's a quick guide. For a binding figure we'll review subfloor, prep, access, and delivery — usually within a working day." },
+  { q: "What's wastage?",                      a: "An allowance for cuts, breaks, and pattern matching. 10% covers most rooms; herringbone and tile bias may need 15%." },
+  { q: "Do you deliver outside Karachi?",       a: "Yes — nationwide for trade. Delivery is calculated by postcode and weight at checkout." },
+  { q: "Can I add the result to my cart?",      a: "Yes. Hit Add to cart and we'll convert m² to packs based on the product unit, rounded up." },
 ]
 
 export function Calculator() {
+  const searchParams = useSearchParams()
+  const presetSlug = searchParams.get("product")
+
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [productId, setProductId] = useState<string>("")
-  const [kind, setKind] = useState<"floor" | "wall">("floor")
-  const [length, setLength] = useState(6)
-  const [width, setWidth] = useState(4)
-  const [wastage, setWastage] = useState(0.1)
-  const [underlay, setUnderlay] = useState(600)
-  const [fitting, setFitting] = useState(2200)
+  const [kind, setKind] = useState<string>("")
+  const [length, setLength] = useState<string>("")
+  const [width, setWidth] = useState<string>("")
+  const [wastage, setWastage] = useState<string>("")
+  const [underlay, setUnderlay] = useState<string>("")
+  const [fitting, setFitting] = useState<string>("")
   const [postcode, setPostcode] = useState("")
 
   const { addItem, toggleCart } = useCartStore()
@@ -51,7 +79,11 @@ export function Calculator() {
         if (!cancelled) {
           const list = Array.isArray(data) ? data : []
           setProducts(list)
-          if (list[0]) setProductId(String(list[0]._id))
+          // Only auto-select if user navigated here from a product page (?product=<slug>)
+          if (presetSlug) {
+            const match = list.find((p: Product) => p.slug === presetSlug)
+            if (match) setProductId(String(match._id))
+          }
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -61,18 +93,24 @@ export function Calculator() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [presetSlug])
 
   const product = useMemo(
     () => products.find((p) => String(p._id) === productId) ?? null,
     [products, productId],
   )
 
-  const area = Math.max(0, length) * Math.max(0, width)
-  const matArea = area * (1 + wastage)
+  const lengthN = parseFloat(length) || 0
+  const widthN = parseFloat(width) || 0
+  const wastageN = parseFloat(wastage) || 0
+  const underlayN = parseFloat(underlay) || 0
+  const fittingN = parseFloat(fitting) || 0
+
+  const area = Math.max(0, lengthN) * Math.max(0, widthN)
+  const matArea = area * (1 + wastageN)
   const matCost = product ? matArea * product.price : 0
-  const underCost = matArea * underlay
-  const fitCost = area * fitting
+  const underCost = matArea * underlayN
+  const fitCost = area * fittingN
   const total = matCost + underCost + fitCost
 
   const handleAdd = () => {
@@ -93,135 +131,255 @@ export function Calculator() {
         <span className="t-eyebrow">
           <span className="diamond">◆</span>Estimate calculator
         </span>
-        <Link href="/contact" className="tfi-link">↳ Get a quote</Link>
+        <div className="tfi-topbar__right">
+          <Link href="/contact" className="tfi-link">↳ Get a quote</Link>
+          <TfiCartButton tone="ink" />
+        </div>
       </div>
 
-      <section className="est">
-        <h1>Tell us the room. We&apos;ll tell you what it costs.</h1>
-        <p style={{ color: "var(--tfi-mute)", marginTop: 14, maxWidth: 560 }}>
-          Rough numbers, ex. tax. For a binding quotation, send the result to our trade team —
-          we&apos;ll factor in subfloor, underlay, and fitting.
-        </p>
+      {/* ============ HERO ============ */}
+      <section className="est-hero">
+        <FadeUp>
+          <div className="est-hero__crumbs">
+            <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>Home</Link>
+            <span style={{ margin: "0 10px", opacity: 0.6 }}>/</span>Estimate
+          </div>
+        </FadeUp>
+        <h1 className="est-hero__title">
+          <Reveal><span>Get an estimate</span></Reveal>
+          <br />
+          <Reveal delay={0.08}><span>in seconds.</span></Reveal>
+        </h1>
+        <FadeUp delay={0.14}>
+          <p className="est-hero__sub">
+            Tell us the room and the material. We&apos;ll do the maths — area, wastage, underlay,
+            fitting, and totals — and you can drop the result straight into your cart or send it
+            to our trade team for a binding quote.
+          </p>
+        </FadeUp>
+      </section>
 
-        <div className="est__panel">
-          <div className="est__row">
-            <div className="est__field">
-              <label htmlFor="prod">Product</label>
-              <select
-                id="prod"
-                value={productId}
-                onChange={(e) => setProductId(e.target.value)}
-                disabled={loading}
-              >
-                {loading && <option>Loading…</option>}
-                {!loading && products.length === 0 && <option>No products available</option>}
-                {products.map((p) => (
-                  <option key={String(p._id)} value={String(p._id)}>
-                    {p.name} — PKR {p.price}/{p.unit || "unit"}
+      {/* ============ MAIN LAYOUT ============ */}
+      <section className="est-layout">
+        {/* Left: explanation, steps, trust */}
+        <aside className="est-side">
+          <FadeUp>
+            <div className="est-side__eyebrow">How it works</div>
+          </FadeUp>
+          <h2 className="est-side__title">
+            <Reveal><span>Three quick steps,</span></Reveal>
+            <br />
+            <Reveal delay={0.06}><span>no callbacks.</span></Reveal>
+          </h2>
+
+          <StaggerGroup className="est-steps" stagger={0.08}>
+            {STEPS.map((s, i) => (
+              <StaggerItem key={s.title}>
+                <div className="est-step">
+                  <div className="est-step__num" aria-hidden>{i + 1}</div>
+                  <div>
+                    <div className="est-step__title">{s.title}</div>
+                    <p className="est-step__copy">{s.copy}</p>
+                  </div>
+                </div>
+              </StaggerItem>
+            ))}
+          </StaggerGroup>
+
+          <StaggerGroup className="est-trust" stagger={0.08}>
+            <StaggerItem>
+              <div>
+                <div className="est-trust__num">&lt; 24h</div>
+                <div className="est-trust__lbl">Trade team response time</div>
+              </div>
+            </StaggerItem>
+            <StaggerItem>
+              <div>
+                <div className="est-trust__num">15 yr</div>
+                <div className="est-trust__lbl">Commercial warranty</div>
+              </div>
+            </StaggerItem>
+            <StaggerItem>
+              <div>
+                <div className="est-trust__num">FSC</div>
+                <div className="est-trust__lbl">Certified timber sources</div>
+              </div>
+            </StaggerItem>
+            <StaggerItem>
+              <div>
+                <div className="est-trust__num">PK</div>
+                <div className="est-trust__lbl">Nationwide delivery</div>
+              </div>
+            </StaggerItem>
+          </StaggerGroup>
+        </aside>
+
+        {/* Right: estimate card */}
+        <FadeUp y={40}>
+          <div className="est-card">
+            <div className="est-card__head">
+              <h2>Your estimate</h2>
+              <span className="est-card__hint">Live · updates as you type</span>
+            </div>
+
+            <div className="est-row-2">
+              <div className="est-field">
+                <label htmlFor="prod">Product</label>
+                <select
+                  id="prod"
+                  value={productId}
+                  onChange={(e) => setProductId(e.target.value)}
+                  disabled={loading}
+                >
+                  <option value="" disabled>
+                    {loading
+                      ? "Loading…"
+                      : products.length === 0
+                        ? "No products available"
+                        : "Select a product"}
                   </option>
-                ))}
-              </select>
+                  {products.map((p) => (
+                    <option key={String(p._id)} value={String(p._id)}>
+                      {p.name} — £{p.price}/{p.unit || "unit"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="est-field">
+                <label htmlFor="kind">Surface type</label>
+                <select id="kind" value={kind} onChange={(e) => setKind(e.target.value)}>
+                  <option value="" disabled>Select a surface</option>
+                  <option value="floor">Floor</option>
+                  <option value="wall">Wall panel</option>
+                </select>
+              </div>
             </div>
-            <div className="est__field">
-              <label htmlFor="kind">Surface type</label>
-              <select id="kind" value={kind} onChange={(e) => setKind(e.target.value as "floor" | "wall")}>
-                <option value="floor">Floor</option>
-                <option value="wall">Wall panel</option>
-              </select>
-            </div>
-          </div>
 
-          <div className="est__row">
-            <div className="est__field">
-              <label htmlFor="len">Length (m)</label>
-              <input
-                id="len"
-                type="number"
-                min={0}
-                step={0.1}
-                value={length}
-                onChange={(e) => setLength(parseFloat(e.target.value) || 0)}
-              />
+            <div className="est-row-2">
+              <div className="est-field">
+                <label htmlFor="len">Length (m)</label>
+                <input
+                  id="len"
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  step={0.1}
+                  placeholder="e.g. 6"
+                  value={length}
+                  onChange={(e) => setLength(e.target.value)}
+                />
+              </div>
+              <div className="est-field">
+                <label htmlFor="wid">Width (m)</label>
+                <input
+                  id="wid"
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  step={0.1}
+                  placeholder="e.g. 4"
+                  value={width}
+                  onChange={(e) => setWidth(e.target.value)}
+                />
+              </div>
             </div>
-            <div className="est__field">
-              <label htmlFor="wid">Width (m)</label>
-              <input
-                id="wid"
-                type="number"
-                min={0}
-                step={0.1}
-                value={width}
-                onChange={(e) => setWidth(parseFloat(e.target.value) || 0)}
-              />
-            </div>
-          </div>
 
-          <div className="est__row">
-            <div className="est__field">
-              <label htmlFor="waste">Wastage</label>
-              <select id="waste" value={wastage} onChange={(e) => setWastage(parseFloat(e.target.value))}>
-                {WASTAGE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+            <div className="est-row-2">
+              <div className="est-field">
+                <label htmlFor="waste">Wastage</label>
+                <select id="waste" value={wastage} onChange={(e) => setWastage(e.target.value)}>
+                  <option value="" disabled>Select wastage</option>
+                  {WASTAGE_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="est-field">
+                <label htmlFor="under">Underlay</label>
+                <select id="under" value={underlay} onChange={(e) => setUnderlay(e.target.value)}>
+                  <option value="" disabled>Select underlay</option>
+                  {UNDERLAY_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div className="est__field">
-              <label htmlFor="under">Underlay</label>
-              <select id="under" value={underlay} onChange={(e) => setUnderlay(parseFloat(e.target.value))}>
-                {UNDERLAY_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
 
-          <div className="est__row">
-            <div className="est__field">
-              <label htmlFor="fit">Fitting</label>
-              <select id="fit" value={fitting} onChange={(e) => setFitting(parseFloat(e.target.value))}>
-                {FITTING_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+            <div className="est-row-2">
+              <div className="est-field">
+                <label htmlFor="fit">Fitting</label>
+                <select id="fit" value={fitting} onChange={(e) => setFitting(e.target.value)}>
+                  <option value="" disabled>Select fitting</option>
+                  {FITTING_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="est-field">
+                <label htmlFor="post">Postcode (delivery)</label>
+                <input
+                  id="post"
+                  type="text"
+                  placeholder="e.g. 75600"
+                  value={postcode}
+                  onChange={(e) => setPostcode(e.target.value)}
+                />
+              </div>
             </div>
-            <div className="est__field">
-              <label htmlFor="post">Postcode (delivery)</label>
-              <input
-                id="post"
-                type="text"
-                placeholder="e.g. 75600"
-                value={postcode}
-                onChange={(e) => setPostcode(e.target.value)}
-              />
+
+            <div className="est-summary">
+              <div className="est-summary__row">
+                <span className="est-summary__label">Area</span>
+                <span className="est-summary__value">{area.toFixed(2)} m²</span>
+              </div>
+              <div className="est-summary__row">
+                <span className="est-summary__label">Material (incl. wastage)</span>
+                <span className="est-summary__value">
+                  {matArea.toFixed(2)} m² × £{product?.price ?? 0} = {fmt(matCost)}
+                </span>
+              </div>
+              <div className="est-summary__row">
+                <span className="est-summary__label">Underlay</span>
+                <span className="est-summary__value">{fmt(underCost)}</span>
+              </div>
+              <div className="est-summary__row">
+                <span className="est-summary__label">Fitting</span>
+                <span className="est-summary__value">{fmt(fitCost)}</span>
+              </div>
+              <div className="est-summary__row est-summary__row--total">
+                <span className="est-summary__label">Estimate</span>
+                <span className="est-summary__value">{fmt(total)}</span>
+              </div>
             </div>
-          </div>
 
-          <div className="est__summary">
-            <table>
-              <tbody>
-                <tr><td>Area</td><td>{area.toFixed(2)} m²</td></tr>
-                <tr>
-                  <td>Material (incl. wastage)</td>
-                  <td>
-                    {matArea.toFixed(2)} m² × PKR {product?.price ?? 0} = {fmt(matCost)}
-                  </td>
-                </tr>
-                <tr><td>Underlay</td><td>{fmt(underCost)}</td></tr>
-                <tr><td>Fitting</td><td>{fmt(fitCost)}</td></tr>
-                <tr className="total"><td>Estimate</td><td>{fmt(total)}</td></tr>
-              </tbody>
-            </table>
+            <div className="est-actions">
+              <button type="button" className="tfi-pill" onClick={handleAdd}>
+                <span className="arrow">↳</span>Add to cart
+              </button>
+              <Link href="/contact" className="tfi-pill tfi-pill--outline">
+                <span className="arrow">↳</span>Send to trade team
+              </Link>
+            </div>
+            {/* TODO: wire this estimate to a real backend submission (HubSpot/Formspree) */}
           </div>
+        </FadeUp>
+      </section>
 
-          <div style={{ marginTop: 22, display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button type="button" className="tfi-pill" onClick={handleAdd}>
-              <span className="arrow">↳</span>Add to cart
-            </button>
-            <Link href="/contact" className="tfi-pill tfi-pill--outline">
-              <span className="arrow">↳</span>Send to trade team
-            </Link>
-          </div>
-        </div>
+      {/* ============ FAQ ============ */}
+      <section className="est-faq">
+        <FadeUp>
+          <h2>Common questions about estimates.</h2>
+        </FadeUp>
+        <StaggerGroup className="est-faq__grid" stagger={0.06}>
+          {FAQS.map((f) => (
+            <StaggerItem key={f.q}>
+              <div className="est-faq__item">
+                <h3 className="est-faq__q">{f.q}</h3>
+                <p className="est-faq__a">{f.a}</p>
+              </div>
+            </StaggerItem>
+          ))}
+        </StaggerGroup>
       </section>
     </>
   )

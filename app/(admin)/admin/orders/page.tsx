@@ -36,7 +36,10 @@ const STATUS_OPTIONS: OrderStatus[] = [
 
 function OrderDialog({ order, onStatusChange }: { order: Order; onStatusChange: (id: string, status: OrderStatus) => void }) {
   return (
-    <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+    <DialogContent
+      aria-describedby={undefined}
+      className="max-w-lg max-h-[85vh] overflow-y-auto"
+    >
       <DialogHeader>
         <DialogTitle className="font-heading text-lg font-medium">
           Order {order.orderNumber}
@@ -80,7 +83,7 @@ function OrderDialog({ order, onStatusChange }: { order: Order; onStatusChange: 
                 <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
               </div>
               <p className="text-xs text-foreground/80 shrink-0">
-                PKR {(item.price * item.quantity).toLocaleString("en-PK")}
+                £{(item.price * item.quantity).toLocaleString("en-GB")}
               </p>
             </div>
           ))}
@@ -90,7 +93,7 @@ function OrderDialog({ order, onStatusChange }: { order: Order; onStatusChange: 
 
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground text-xs">Total</span>
-          <span className="font-medium">PKR {order.total.toLocaleString("en-PK")}</span>
+          <span className="font-medium">£{order.total.toLocaleString("en-GB")}</span>
         </div>
 
         <Separator className="bg-border/30" />
@@ -168,31 +171,36 @@ export default function AdminOrdersPage() {
   })
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-[10px] tracking-[0.28em] uppercase text-muted-foreground/50 mb-1">
-          Management
-        </p>
-        <h1 className="font-heading text-2xl font-medium text-foreground">Orders</h1>
-      </div>
+    <div>
+      <header className="admin-page-head">
+        <div className="admin-page-head__lead">
+          <p className="admin-eyebrow">Management</p>
+          <h1 className="admin-h1">
+            Orders<span className="accent">.</span>
+          </h1>
+          <p className="admin-page-head__sub">
+            {orders.length} orders · {orders.filter(o => o.status === "pending").length} pending action.
+          </p>
+        </div>
+      </header>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white border border-border/40 px-4 py-3 mb-6">
         <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterStatus)}>
           <TabsList variant="line" className="flex-wrap">
-            <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+            <TabsTrigger value="all" className="text-[10px] tracking-[0.18em] uppercase">All</TabsTrigger>
             {STATUS_OPTIONS.map((s) => (
-              <TabsTrigger key={s} value={s} className="text-xs capitalize">{s}</TabsTrigger>
+              <TabsTrigger key={s} value={s} className="text-[10px] tracking-[0.18em] uppercase capitalize">{s}</TabsTrigger>
             ))}
           </TabsList>
         </Tabs>
-        <div className="relative w-full sm:w-56">
+        <div className="relative w-full sm:w-64">
           <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search orders…"
-            className="pl-8 h-8 text-xs border-border"
+            className="pl-8 h-9 text-xs border-border/60 bg-card"
           />
         </div>
       </div>
@@ -205,12 +213,12 @@ export default function AdminOrdersPage() {
           ))}
         </div>
       ) : (
-        <div className="border border-border/40 overflow-hidden overflow-x-auto">
-          <table className="w-full text-xs min-w-[700px]">
+        <div className="admin-table-shell overflow-x-auto">
+          <table className="admin-table w-full text-xs min-w-[760px]">
             <thead>
-              <tr className="border-b border-border/40 bg-secondary/40">
+              <tr>
                 {["Order #", "Customer", "Phone", "Items", "Total", "Status", "Date", ""].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 text-foreground font-medium tracking-wider uppercase text-[9px]">
+                  <th key={h} className="text-left px-5 py-4">
                     {h}
                   </th>
                 ))}
@@ -219,7 +227,7 @@ export default function AdminOrdersPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-12 text-muted-foreground/40">
+                  <td colSpan={8} className="text-center py-16 text-muted-foreground/40">
                     No orders found.
                   </td>
                 </tr>
@@ -227,16 +235,16 @@ export default function AdminOrdersPage() {
                 filtered.map((order) => (
                   <tr
                     key={String(order._id)}
-                    className="border-b border-border/20 hover:bg-secondary/20 transition-colors"
+                    className="border-t border-border/30 hover:bg-secondary/30 transition-colors"
                   >
-                    <td className="px-4 py-3 font-medium text-foreground/90">{order.orderNumber}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{order.customer.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{order.customer.phone}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{order.items.length}</td>
-                    <td className="px-4 py-3 text-foreground/80">
-                      PKR {order.total.toLocaleString("en-PK")}
+                    <td className="px-5 py-3.5 font-medium text-foreground/95">{order.orderNumber}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">{order.customer.name}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">{order.customer.phone}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">{order.items.length}</td>
+                    <td className="px-5 py-3.5 text-foreground/85">
+                      £{order.total.toLocaleString("en-GB")}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-5 py-3.5">
                       <Badge
                         variant="outline"
                         className={`text-[9px] tracking-wider uppercase ${ADMIN_ORDER_STATUS_BADGE[order.status] ?? ""}`}
@@ -244,10 +252,10 @@ export default function AdminOrdersPage() {
                         {order.status}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground/50">
-                      {new Date(order.createdAt).toLocaleDateString("en-PK")}
+                    <td className="px-5 py-3.5 text-muted-foreground/55">
+                      {new Date(order.createdAt).toLocaleDateString("en-GB")}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-5 py-3.5">
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button variant="ghost" size="icon-sm">

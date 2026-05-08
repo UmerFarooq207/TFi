@@ -1,4 +1,10 @@
 import Link from "next/link"
+import { HomeExtras } from "@/components/home-extras"
+import { TestimonialsMarquee } from "@/components/testimonials-marquee"
+import { ShowroomScroll } from "@/components/showroom-scroll"
+import { HeroPin } from "@/components/hero-pin"
+import { Reveal, FadeUp, StaggerGroup, StaggerItem } from "@/components/reveal"
+import { FeaturedProducts } from "@/components/featured-products"
 
 export const metadata = {
   title: "TFi — Floors & Interiors",
@@ -6,176 +12,173 @@ export const metadata = {
     "Considered floors and panels for those who build with intent. Premium flooring, wall paneling, and surfaces.",
 }
 
+const TESTIMONIALS = [
+  { name: "Eleanor Whitfield", role: "Architect, EW Studio",          initials: "EW", rating: 5, text: "Specified TFi engineered oak across three retail fits this year. Lead times held, finish held, install crew loved working with the boards." },
+  { name: "Marcus Hale",       role: "Homeowner, Clifton",            initials: "MH", rating: 5, text: "We renovated the whole ground floor with their fumed walnut. Two years on it still looks the day it went down. Worth every penny." },
+  { name: "Sasha Devereux",    role: "Interior designer",             initials: "SD", rating: 5, text: "Their acoustic panels saved a ceiling project that the contractor swore couldn't be done. Showroom team knew their stuff inside out." },
+  { name: "James Okonkwo",     role: "Build manager, Kindred",        initials: "JO", rating: 4, text: "Microcement is finally a material I trust. We've used six finishes from TFi this year. Trade portal is genuinely useful." },
+  { name: "Iris Karpinska",    role: "Studio principal, IK Practice", initials: "IK", rating: 5, text: "What I appreciate most is restraint — clean samples, real grain, no stylistic noise. It's how the catalogue should work." },
+  { name: "Dominic Reyes",     role: "Developer, Reyes & Co.",        initials: "DR", rating: 5, text: "We did a 14-flat refurb on stair treads alone. Cut to spec, on time, and warranty paperwork was the easiest part of the job." },
+]
+
 export default function HomePage() {
   return (
     <>
-      {/* ============ HERO ============ */}
-      <section className="home-hero" data-screen-label="01 Hero">
-        <div className="home-hero__leaf-l" aria-hidden />
-        <div className="home-hero__leaf-r" aria-hidden />
-        <div className="home-hero__brand">TFi</div>
+      {/* ============ HERO — pinned two-stage reveal ============ */}
+      <HeroPin />
 
-        <div className="tfi-topbar tfi-topbar--on-image">
-          <span />
-          <Link href="/contact" className="tfi-link" style={{ color: "#fff" }}>
-            ↳ Get a quote
-          </Link>
-        </div>
-
-        <h1 className="home-hero__title">
-          Considered floors and panels<br />
-          for those who build with intent.
-        </h1>
-      </section>
-
-      {/* ============ PRODUCT COLLECTION ============ */}
+      {/* ============ PRODUCT COLLECTION (bento) ============ */}
       <section className="collection" data-screen-label="02 Collection">
         <div className="tfi-section-eyebrow">
-          <span className="t-eyebrow">
-            <span className="diamond">◆</span>Product Collection
-          </span>
+          <Reveal>
+            <span className="t-eyebrow">
+              <span className="diamond">◆</span>Product Collection
+            </span>
+          </Reveal>
+        </div>
+        <div className="collection__intro">
+          <h2>
+            <Reveal><span>Surfaces, considered.</span></Reveal>
+            <br />
+            <Reveal delay={0.08}><span>Floor to ceiling.</span></Reveal>
+          </h2>
+          <FadeUp delay={0.15}>
+            <p>
+              Six collections built around the rooms they go into — grain, weight, and the kind of
+              detail you only notice when it&apos;s missing.
+            </p>
+          </FadeUp>
         </div>
 
-        <div className="collection__row">
-          <div />
-          <div className="collection__visual">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=1400&q=70"
-              alt="Engineered wood floor"
-            />
-            <Link href="/products?category=flooring" className="view">
-              View
+        <StaggerGroup className="bento" stagger={0.09}>
+          <StaggerItem className="bento-card bc-sm">
+            <Link href="/products?category=flooring" className="bento-card__inner">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=1200&q=70" alt="Engineered oak floor" loading="lazy" />
+              <div className="bc-body">
+                <div><div className="bc-eyebrow">Collection 01</div></div>
+                <div>
+                  <div className="bc-title">Engineered Oak</div>
+                  <span className="bc-pill"><span className="arrow">↳</span>View floors</span>
+                </div>
+              </div>
             </Link>
-            <div className="label">Floors</div>
-          </div>
-          <div className="collection__copy">
-            <p>
-              Our <strong>floors collection</strong> is built around grain, warmth, and the kind of
-              detail you only notice underfoot. Made for rooms that need to last.
-            </p>
-            <Link href="/products?category=flooring" className="tfi-pill">
-              <span className="arrow">↳</span>Product overview
-            </Link>
-          </div>
-        </div>
+          </StaggerItem>
 
-        <div className="collection__row">
-          <div className="collection__copy collection__copy--right">
-            <p>
-              <strong>Wall panels</strong> in solid oak, walnut, and acoustic felt — engineered
-              for rooms that should feel composed, not decorated.
-            </p>
-            <Link href="/products?category=wall-paneling" className="tfi-pill">
-              <span className="arrow">↳</span>Product overview
+          <StaggerItem className="bento-card bc-lg">
+            <Link href="/products?category=wall-paneling" className="bento-card__inner">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="https://images.unsplash.com/photo-1618219740975-d40978bb7378?w=1600&q=70" alt="Slatted wall panels in walnut" loading="lazy" />
+              <div className="bc-body">
+                <div><div className="bc-eyebrow">Collection 02</div></div>
+                <div>
+                  <div className="bc-title">Acoustic Wall Panels</div>
+                  <p className="bc-meta">Solid timber slats over felt — quiet rooms, soft echoes, no compromises.</p>
+                  <span className="bc-pill" style={{ marginTop: 14 }}><span className="arrow">↳</span>View panels</span>
+                </div>
+              </div>
             </Link>
-          </div>
-          <div className="collection__visual">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://images.unsplash.com/photo-1618219740975-d40978bb7378?w=1400&q=70"
-              alt="Wood wall panels"
-            />
-            <Link href="/products?category=wall-paneling" className="view">
-              View
-            </Link>
-            <div className="label">Panels</div>
-          </div>
-          <div />
-        </div>
+          </StaggerItem>
 
-        <div className="collection__row">
-          <div />
-          <div className="collection__visual">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1400&q=70"
-              alt="Interior surfaces"
-            />
-            <Link href="/products?category=kitchen" className="view">
-              View
+          <StaggerItem className="bento-card bc-half-l">
+            <Link href="/products?category=kitchen" className="bento-card__inner">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1600&q=70" alt="Microcement bath surface" loading="lazy" />
+              <div className="bc-body">
+                <div><div className="bc-eyebrow">Collection 03</div></div>
+                <div>
+                  <div className="bc-title">Microcement &amp; Stone</div>
+                  <p className="bc-meta">Seamless surfaces for kitchens, baths, and rooms that don&apos;t forgive shortcuts.</p>
+                  <span className="bc-pill" style={{ marginTop: 14 }}><span className="arrow">↳</span>View surfaces</span>
+                </div>
+              </div>
             </Link>
-            <div className="label">Surfaces</div>
-          </div>
-          <div className="collection__copy">
-            <p>
-              <strong>Surfaces</strong> covers our stone, concrete-effect, and microcement
-              finishes — for kitchens, baths, and the kind of rooms that don&apos;t forgive
-              shortcuts.
-            </p>
-            <Link href="/products?category=kitchen" className="tfi-pill">
-              <span className="arrow">↳</span>Product overview
+          </StaggerItem>
+
+          <StaggerItem className="bento-card bc-half-r">
+            <Link href="/products?category=stairs" className="bento-card__inner">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&q=70" alt="Solid timber stair treads" loading="lazy" />
+              <div className="bc-body">
+                <div><div className="bc-eyebrow">Collection 04</div></div>
+                <div>
+                  <div className="bc-title">Stair &amp; Tread</div>
+                  <p className="bc-meta">Solid stair treads, risers, and nosings cut to your build.</p>
+                  <span className="bc-pill" style={{ marginTop: 14 }}><span className="arrow">↳</span>View stairs</span>
+                </div>
+              </div>
             </Link>
-          </div>
-        </div>
+          </StaggerItem>
+
+          <StaggerItem className="bento-card bc-full">
+            <Link href="/products" className="bento-card__inner">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=2000&q=70" alt="Trade installation overview" loading="lazy" />
+              <div className="bc-body">
+                <div><div className="bc-eyebrow">For trade</div></div>
+                <div>
+                  <div className="bc-title">Specifying for residential &amp; commercial builds</div>
+                  <span className="bc-pill" style={{ marginTop: 14 }}><span className="arrow">↳</span>Trade portal</span>
+                </div>
+              </div>
+            </Link>
+          </StaggerItem>
+        </StaggerGroup>
       </section>
 
-      {/* ============ SHOWROOM ============ */}
-      <section className="showroom" data-screen-label="03 Showroom">
-        <div className="tfi-section-eyebrow">
-          <span className="t-eyebrow" style={{ color: "var(--tfi-cream)" }}>
-            <span className="diamond">◆</span>Showroom
-          </span>
-        </div>
+      {/* ============ PRODUCT SHOWCASE — featured from DB ============ */}
+      <FeaturedProducts />
 
-        <div className="showroom__row">
-          <div className="showroom__title">
-            A place where material<br />and craft meet.
-          </div>
-          <div className="showroom__visual">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1600&q=70"
-              alt="TFi showroom"
-            />
-          </div>
-          <div className="showroom__addr">
-            <div className="lbl">Address</div>
-            <div className="val">
-              123 Design District, Clifton<br />
-              Karachi 75600, Pakistan
-            </div>
-            <Link href="/contact" className="tfi-pill">
-              <span className="arrow">↳</span>Showroom
-            </Link>
-          </div>
+      {/* ============ TESTIMONIALS — infinite marquee ============ */}
+      <section className="testimonials" data-screen-label="04 Testimonials">
+        <div className="testimonials__head">
+          <Reveal>
+            <span className="t-eyebrow" style={{ color: "var(--tfi-cream)" }}>
+              <span className="diamond">◆</span>What Our Customers Say
+            </span>
+          </Reveal>
+          <h2>
+            <Reveal><span>Specified, fitted,</span></Reveal>
+            <br />
+            <Reveal delay={0.08}><span>still standing.</span></Reveal>
+          </h2>
         </div>
+        <TestimonialsMarquee items={TESTIMONIALS} />
       </section>
+
+      {/* ============ SHOWROOM — pinned scroll-expansion ============ */}
+      <ShowroomScroll />
 
       {/* ============ APPROACH ============ */}
-      <section className="approach" data-screen-label="04 Approach">
+      <section className="approach" data-screen-label="06 Approach">
         <div className="approach__inner">
-          <span className="t-eyebrow" style={{ color: "#fff" }}>
-            <span className="diamond">◆</span>Approach
-          </span>
+          <Reveal>
+            <span className="t-eyebrow" style={{ color: "#fff" }}>
+              <span className="diamond">◆</span>Approach
+            </span>
+          </Reveal>
           <h2>
-            Material first. Detail always.<br />Trends, never.
+            <Reveal><span>Material first. Detail always.</span></Reveal>
+            <br />
+            <Reveal delay={0.08}><span>Trends, never.</span></Reveal>
           </h2>
-          <Link href="/calculator" className="tfi-pill">
-            <span className="arrow">↳</span>Estimate calculator
-          </Link>
+          <FadeUp delay={0.18}>
+            <Link href="/calculator" className="tfi-pill">
+              <span className="arrow">↳</span>Estimate calculator
+            </Link>
+          </FadeUp>
         </div>
       </section>
 
       {/* ============ STATS ============ */}
-      <section className="stats" data-screen-label="05 Stats">
-        <div>
-          <div className="num">120+</div>
-          <div className="lbl">Finishes across floors, panels, surfaces</div>
-        </div>
-        <div>
-          <div className="num">15 yr</div>
-          <div className="lbl">Warranty on commercial installations</div>
-        </div>
-        <div>
-          <div className="num">FSC</div>
-          <div className="lbl">All timber sourced from certified forests</div>
-        </div>
-        <div>
-          <div className="num">PK</div>
-          <div className="lbl">Karachi showroom + nationwide trade</div>
-        </div>
-      </section>
+      <StaggerGroup className="stats" stagger={0.08}>
+        <StaggerItem><div><div className="num">120+</div><div className="lbl">Finishes across floors, panels, surfaces</div></div></StaggerItem>
+        <StaggerItem><div><div className="num">15 yr</div><div className="lbl">Warranty on commercial installations</div></div></StaggerItem>
+        <StaggerItem><div><div className="num">FSC</div><div className="lbl">All timber sourced from certified forests</div></div></StaggerItem>
+        <StaggerItem><div><div className="num">PK</div><div className="lbl">Karachi showroom + nationwide trade</div></div></StaggerItem>
+      </StaggerGroup>
+
+      <HomeExtras />
     </>
   )
 }

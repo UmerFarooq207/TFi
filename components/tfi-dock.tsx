@@ -2,15 +2,16 @@
 
 import { useEffect, useState, useCallback, useRef } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { useCartStore } from "@/store/cart"
 
 const PAGE_LABELS: Record<string, string> = {
   "/": "Home",
   "/products": "Collections",
   "/calculator": "Estimate",
   "/contact": "Contact",
-  "/checkout": "Cart",
+  "/cart": "Cart",
+  "/checkout": "Checkout",
   "/about": "About",
   "/services": "Services",
   "/visualizer": "Visualizer",
@@ -23,24 +24,29 @@ function getPageLabel(pathname: string) {
   return "TFi"
 }
 
-function TfiMonogram({ className = "" }: { className?: string }) {
+function TfiMonogram() {
   return (
-    <svg viewBox="0 0 32 32" fill="currentColor" stroke="currentColor" strokeWidth={1.4} className={className}>
-      <path d="M16 3 L27 9 L27 23 L16 29 L5 23 L5 9 Z" fill="none" />
-      <path d="M11 12 L20 12 L23 16 L20 20 L11 20 L8 16 Z" />
-    </svg>
+    <Image
+      src="/assets/TFI-nav-footer.png"
+      alt="TFi"
+      width={120}
+      height={120}
+      priority
+      style={{ width: 36, height: 36, objectFit: "contain" }}
+    />
   )
 }
 
 export function TfiDock() {
   const pathname = usePathname()
   const label = getPageLabel(pathname)
-  const itemCount = useCartStore((s) => s.getItemCount())
 
   const [isOpen, setOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
   const [isClosing, setClosing] = useState(false)
   const autoOpenedRef = useRef(false)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastScrollY = useRef(0)
 
   const open = useCallback(() => {
     if (closeTimer.current) clearTimeout(closeTimer.current)
@@ -52,13 +58,13 @@ export function TfiDock() {
     setClosing(true)
     setOpen(false)
     if (closeTimer.current) clearTimeout(closeTimer.current)
-    closeTimer.current = setTimeout(() => setClosing(false), 360)
+    closeTimer.current = setTimeout(() => setClosing(false), 400)
   }, [])
 
-  // Manual open from dock button
   const handleDockMenu = () => {
     autoOpenedRef.current = false
-    open()
+    if (isOpen) close()
+    else open()
   }
 
   const handleClose = () => {
@@ -66,7 +72,6 @@ export function TfiDock() {
     close()
   }
 
-  // Footer auto-open via global event from TfiFooter
   useEffect(() => {
     function handleAutoOpen(e: Event) {
       const detail = (e as CustomEvent).detail as { open: boolean } | undefined
@@ -82,15 +87,13 @@ export function TfiDock() {
     return () => window.removeEventListener("tfi:footer-menu", handleAutoOpen as EventListener)
   }, [open, close])
 
-  // Close on route change
   useEffect(() => {
     autoOpenedRef.current = false
+    setAccountOpen(false)
     close()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])
 
-  // Lock scroll while modal open? — keep scroll free so footer auto-close still works
-  // ESC closes
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape" && isOpen) {
@@ -102,12 +105,26 @@ export function TfiDock() {
     return () => document.removeEventListener("keydown", onKey)
   }, [isOpen, close])
 
+  // Auto-close on scroll down
+  useEffect(() => {
+    lastScrollY.current = window.scrollY
+    function onScroll() {
+      const y = window.scrollY
+      if (isOpen && !autoOpenedRef.current && y > lastScrollY.current + 30) {
+        close()
+      }
+      lastScrollY.current = y
+    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [isOpen, close])
+
+  const dockClass = ["tfi-dock", isOpen ? "menu-open" : ""].filter(Boolean).join(" ")
   const modalClass = ["tfi-modal", isOpen ? "is-open" : "", isClosing ? "is-closing" : ""].filter(Boolean).join(" ")
 
   return (
     <>
-      {/* Dock */}
-      <nav className="tfi-dock" aria-label="Site navigation">
+      <nav className={dockClass} aria-label="Site navigation">
         <Link className="tfi-dock__logo" href="/" aria-label="TFi home">
           <TfiMonogram />
         </Link>
@@ -115,20 +132,18 @@ export function TfiDock() {
           {label}
         </button>
         <button
-          className="tfi-dock__menu"
+          className="tfi-dock__burger"
           type="button"
           onClick={handleDockMenu}
-          aria-label="Open menu"
+          aria-label={isOpen ? "Close menu" : "Open menu"}
           aria-expanded={isOpen}
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-            <line x1="4" y1="8" x2="20" y2="8" />
-            <line x1="4" y1="16" x2="20" y2="16" />
-          </svg>
+          <span />
+          <span />
+          <span />
         </button>
       </nav>
 
-      {/* Modal */}
       <div
         className={modalClass}
         role="dialog"
@@ -139,22 +154,29 @@ export function TfiDock() {
         }}
       >
         <div className="tfi-modal__panel">
-          <button className="tfi-modal__close" type="button" onClick={handleClose} aria-label="Close menu">
-            ×
-          </button>
-          <div className="t-eyebrow" style={{ color: "var(--tfi-mute-dark)" }}>
-            Menu
-          </div>
+          <div className="tfi-modal__eyebrow">Menu</div>
           <ul className="tfi-modal__menu">
             <li><Link href="/" onClick={handleClose}>Home</Link></li>
             <li><Link href="/products" onClick={handleClose}>Collections</Link></li>
             <li><Link href="/calculator" onClick={handleClose}>Estimate</Link></li>
+            <li><Link href="/visualizer" onClick={handleClose}>Visualizer</Link></li>
+            <li><Link href="/cart" onClick={handleClose}>Cart</Link></li>
             <li><Link href="/contact" onClick={handleClose}>Contact</Link></li>
-            <li>
-              <Link href="/checkout" onClick={handleClose}>
-                Cart
-                {itemCount > 0 && <span className="tfi-cart-pill">{itemCount}</span>}
-              </Link>
+            <li className={`tfi-modal__account${accountOpen ? " is-open" : ""}`}>
+              <button
+                type="button"
+                className="tfi-modal__account-toggle"
+                onClick={() => setAccountOpen((v) => !v)}
+                aria-expanded={accountOpen}
+              >
+                Account
+                <span className="tfi-modal__account-caret" aria-hidden>{accountOpen ? "−" : "+"}</span>
+              </button>
+              {accountOpen && (
+                <ul className="tfi-modal__account-menu">
+                  <li><Link href="/login" onClick={handleClose}>Admin Login</Link></li>
+                </ul>
+              )}
             </li>
           </ul>
           <div className="tfi-modal__contact">
@@ -165,6 +187,12 @@ export function TfiDock() {
             <span className="arrow">↳</span>Get a quote
           </Link>
         </div>
+        <button
+          className="tfi-modal__close"
+          type="button"
+          onClick={handleClose}
+          aria-label="Close menu"
+        />
       </div>
     </>
   )

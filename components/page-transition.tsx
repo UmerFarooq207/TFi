@@ -1,32 +1,43 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
+import { useEffect } from "react"
 
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const reduce = useReducedMotion()
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" })
+    }
+  }, [pathname, reduce])
+
+  if (reduce) {
+    return <div key={pathname}>{children}</div>
+  }
 
   return (
-    <AnimatePresence mode="popLayout">
+    <AnimatePresence mode="popLayout" initial={false}>
       <motion.div
         key={pathname}
-        initial={{
-          opacity: 0,
-          filter: "blur(14px) saturate(0.6)",
-          scale: 0.984,
-          y: 14,
-        }}
+        initial={{ opacity: 0, y: 110, scale: 1, filter: "blur(8px)" }}
         animate={{
           opacity: 1,
-          filter: "blur(0px) saturate(1)",
-          scale: 1,
           y: 0,
+          scale: 1,
+          filter: "blur(0px)",
+          transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.05 },
         }}
-        transition={{
-          duration: 0.7,
-          ease: [0.22, 1, 0.36, 1],
+        exit={{
+          opacity: 0,
+          y: -24,
+          scale: 0.965,
+          filter: "blur(6px)",
+          transition: { duration: 0.42, ease: [0.4, 0, 0.6, 1] },
         }}
-        style={{ transformOrigin: "top center", willChange: "opacity, transform, filter" }}
+        style={{ position: "relative", transformOrigin: "center top", willChange: "opacity, transform, filter" }}
       >
         {children}
       </motion.div>

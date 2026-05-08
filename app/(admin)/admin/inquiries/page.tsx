@@ -60,7 +60,10 @@ function InquiryDialog({
   }
 
   return (
-    <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+    <DialogContent
+      aria-describedby={undefined}
+      className="max-w-lg max-h-[85vh] overflow-y-auto"
+    >
       <DialogHeader>
         <DialogTitle className="font-heading text-lg font-medium">
           Inquiry from {inquiry.name}
@@ -90,7 +93,7 @@ function InquiryDialog({
               </>
             )}
             <span className="text-muted-foreground">Received</span>
-            <span>{new Date(inquiry.createdAt).toLocaleString("en-PK")}</span>
+            <span>{new Date(inquiry.createdAt).toLocaleString("en-GB")}</span>
           </div>
         </div>
 
@@ -210,26 +213,31 @@ export default function AdminInquiriesPage() {
   })
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-[10px] tracking-[0.28em] uppercase text-muted-foreground/50 mb-1">
-          Customer Communications
-        </p>
-        <h1 className="font-heading text-2xl font-medium text-foreground">Inquiries</h1>
-      </div>
+    <div>
+      <header className="admin-page-head">
+        <div className="admin-page-head__lead">
+          <p className="admin-eyebrow">Communications</p>
+          <h1 className="admin-h1">
+            Inquiries<span className="accent">.</span>
+          </h1>
+          <p className="admin-page-head__sub">
+            {inquiries.length} total · {inquiries.filter((q) => q.status === "new").length} new since you last looked.
+          </p>
+        </div>
+      </header>
 
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white border border-border/40 px-4 py-3 mb-6">
         <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterStatus)}>
           <TabsList variant="line" className="flex-wrap">
-            <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+            <TabsTrigger value="all" className="text-[10px] tracking-[0.18em] uppercase">All</TabsTrigger>
             {STATUS_OPTIONS.map((s) => (
-              <TabsTrigger key={s} value={s} className="text-xs capitalize">
+              <TabsTrigger key={s} value={s} className="text-[10px] tracking-[0.18em] uppercase capitalize">
                 {s}
               </TabsTrigger>
             ))}
           </TabsList>
         </Tabs>
-        <div className="relative w-full sm:w-64">
+        <div className="relative w-full sm:w-72">
           <Search
             size={12}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40"
@@ -238,7 +246,7 @@ export default function AdminInquiriesPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, email, message…"
-            className="pl-8 h-8 text-xs border-border"
+            className="pl-8 h-9 text-xs border-border/60 bg-card"
           />
         </div>
       </div>
@@ -250,16 +258,13 @@ export default function AdminInquiriesPage() {
           ))}
         </div>
       ) : (
-        <div className="border border-border/40 overflow-hidden overflow-x-auto">
-          <table className="w-full text-xs min-w-[800px]">
+        <div className="admin-table-shell overflow-x-auto">
+          <table className="admin-table w-full text-xs min-w-[820px]">
             <thead>
-              <tr className="border-b border-border/40 bg-secondary/40">
+              <tr>
                 {["Name", "Email", "Service", "Message", "Status", "Date", ""].map(
                   (h) => (
-                    <th
-                      key={h}
-                      className="text-left px-4 py-3 text-foreground font-medium tracking-wider uppercase text-[9px]"
-                    >
+                    <th key={h} className="text-left px-5 py-4">
                       {h}
                     </th>
                   )
@@ -269,7 +274,7 @@ export default function AdminInquiriesPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-muted-foreground/40">
+                  <td colSpan={7} className="text-center py-16 text-muted-foreground/40">
                     No inquiries found.
                   </td>
                 </tr>
@@ -277,21 +282,21 @@ export default function AdminInquiriesPage() {
                 filtered.map((inquiry) => (
                   <tr
                     key={String(inquiry._id)}
-                    className="border-b border-border/20 hover:bg-secondary/20 transition-colors"
+                    className="border-t border-border/30 hover:bg-secondary/30 transition-colors"
                   >
-                    <td className="px-4 py-3 font-medium text-foreground/90">
+                    <td className="px-5 py-3.5 font-medium text-foreground/95">
                       {inquiry.name}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground break-all">
+                    <td className="px-5 py-3.5 text-muted-foreground break-all">
                       {inquiry.email}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-5 py-3.5 text-muted-foreground">
                       {inquiry.service ?? "—"}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground max-w-[260px] truncate">
+                    <td className="px-5 py-3.5 text-muted-foreground max-w-[260px] truncate">
                       {inquiry.message}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-5 py-3.5">
                       <Badge
                         variant="outline"
                         className={`text-[9px] tracking-wider uppercase ${ADMIN_INQUIRY_STATUS_BADGE[inquiry.status] ?? ""}`}
@@ -299,10 +304,10 @@ export default function AdminInquiriesPage() {
                         {inquiry.status}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground/50">
-                      {new Date(inquiry.createdAt).toLocaleDateString("en-PK")}
+                    <td className="px-5 py-3.5 text-muted-foreground/55">
+                      {new Date(inquiry.createdAt).toLocaleDateString("en-GB")}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-5 py-3.5">
                       <div className="flex items-center gap-1">
                         <Dialog>
                           <DialogTrigger asChild>

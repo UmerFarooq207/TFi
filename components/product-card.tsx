@@ -63,7 +63,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             {product.name}
           </h3>
           <p className="text-sm text-muted-foreground">
-            PKR {product.price.toLocaleString("en-PK")}{" "}
+            £{product.price.toLocaleString("en-GB")}{" "}
             <span className="text-xs text-muted-foreground/60">{product.unit}</span>
           </p>
         </div>

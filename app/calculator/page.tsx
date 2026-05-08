@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import { Calculator } from "./calculator"
 
 export const metadata: Metadata = {
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 }
 
 export default function CalculatorPage() {
-  return <Calculator />
+  return (
+    <Suspense fallback={<div style={{ minHeight: "60vh" }} />}>
+      <Calculator />
+    </Suspense>
+  )
 }

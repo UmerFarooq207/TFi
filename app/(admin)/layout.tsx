@@ -1,5 +1,6 @@
 "use client"
 
+import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
@@ -19,24 +20,65 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuBadge,
   SidebarFooter,
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/components/auth-provider"
+import {
+  getLastSeen,
+  SEEN_EVENT,
+  SEEN_KEY_INQUIRIES,
+  SEEN_KEY_ORDERS,
+} from "@/lib/admin-seen"
 
 const navItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/products", label: "Products", icon: Package },
-  { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
-  { href: "/admin/inquiries", label: "Inquiries", icon: Inbox },
-  { href: "/admin/promos", label: "Promos", icon: Tag },
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard, badgeKey: null },
+  { href: "/admin/products", label: "Products", icon: Package, badgeKey: null },
+  { href: "/admin/orders", label: "Orders", icon: ShoppingCart, badgeKey: "orders" as const },
+  { href: "/admin/inquiries", label: "Inquiries", icon: Inbox, badgeKey: "inquiries" as const },
+  { href: "/admin/promos", label: "Promos", icon: Tag, badgeKey: null },
 ]
+
+const POLL_INTERVAL_MS = 30_000
 
 function AdminSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout } = useAuth()
+  const [counts, setCounts] = useState({ newOrders: 0, newInquiries: 0 })
+
+  const fetchCounts = useCallback(async () => {
+    try {
+      const sinceOrders = getLastSeen(SEEN_KEY_ORDERS)
+      const sinceInquiries = getLastSeen(SEEN_KEY_INQUIRIES)
+      const res = await fetch(
+        `/api/admin/notifications?sinceOrders=${sinceOrders}&sinceInquiries=${sinceInquiries}`,
+        { cache: "no-store" },
+      )
+      if (!res.ok) return
+      const data = await res.json()
+      setCounts({
+        newOrders: Number(data.newOrders) || 0,
+        newInquiries: Number(data.newInquiries) || 0,
+      })
+    } catch {
+      // swallow — badges just stay at their last value
+    }
+  }, [])
+
+  // Refetch on mount, on route change, on poll, and when a page marks itself seen.
+  useEffect(() => {
+    fetchCounts()
+    const interval = window.setInterval(fetchCounts, POLL_INTERVAL_MS)
+    const onSeen = () => fetchCounts()
+    window.addEventListener(SEEN_EVENT, onSeen)
+    return () => {
+      window.clearInterval(interval)
+      window.removeEventListener(SEEN_EVENT, onSeen)
+    }
+  }, [fetchCounts, pathname])
 
   const handleLogout = async () => {
     await logout()
@@ -66,6 +108,12 @@ function AdminSidebar() {
               item.href === "/admin"
                 ? pathname === "/admin"
                 : pathname.startsWith(item.href)
+            const badge =
+              item.badgeKey === "orders"
+                ? counts.newOrders
+                : item.badgeKey === "inquiries"
+                  ? counts.newInquiries
+                  : 0
             return (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton asChild isActive={active} className="h-11">
@@ -77,6 +125,11 @@ function AdminSidebar() {
                     {item.label}
                   </Link>
                 </SidebarMenuButton>
+                {badge > 0 && (
+                  <SidebarMenuBadge className="bg-red-600 text-white font-bold opacity-100 shadow-sm peer-hover/menu-button:text-white peer-data-active/menu-button:text-white">
+                    {badge > 99 ? "99+" : badge}
+                  </SidebarMenuBadge>
+                )}
               </SidebarMenuItem>
             )
           })}

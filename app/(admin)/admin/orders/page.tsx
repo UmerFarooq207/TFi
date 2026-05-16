@@ -27,6 +27,7 @@ import {
 import { toStoredImageUrl } from "@/lib/image-url"
 import type { Order, OrderStatus } from "@/lib/models/order"
 import { ADMIN_ORDER_STATUS_BADGE } from "@/lib/admin-status-badges"
+import { markSeen, SEEN_KEY_ORDERS } from "@/lib/admin-seen"
 
 type FilterStatus = "all" | OrderStatus
 
@@ -143,6 +144,7 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     fetchOrders()
+    markSeen(SEEN_KEY_ORDERS)
   }, [])
 
   async function handleStatusChange(id: string, status: OrderStatus) {

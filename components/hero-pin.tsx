@@ -60,9 +60,9 @@ export function HeroPin() {
           </div>
         </div>
         <h1 className="home-hero__title">
-          <Reveal><span>Considered floors and panels</span></Reveal>
+          <Reveal><span>Elevating Interiors</span></Reveal>
           <br />
-          <Reveal delay={0.12}><span>for those who build with intent.</span></Reveal>
+          <Reveal delay={0.12}><span>from the Ground Up.</span></Reveal>
         </h1>
       </section>
     )
@@ -98,9 +98,9 @@ export function HeroPin() {
         </div>
 
         <motion.h1 className="hero-pin__title" style={{ y: titleY, opacity: titleOpacity }}>
-          <Reveal><span>Considered floors and panels</span></Reveal>
+          <Reveal><span>Elevating Interiors</span></Reveal>
           <br />
-          <Reveal delay={0.12}><span>for those who build with intent.</span></Reveal>
+          <Reveal delay={0.12}><span>from the Ground Up.</span></Reveal>
         </motion.h1>
 
         <motion.div className="hero-pin__panel" style={{ opacity: panelOpacity, y: panelY }}>
@@ -110,9 +110,9 @@ export function HeroPin() {
             </span>
             <span className="hero-pin__divider" aria-hidden />
             <p className="hero-pin__copy">
-              We design and install considered surfaces for ambitious builds — engineered oak,
-              acoustic panels, microcement, and stone. Every plank reflects our commitment to
-              craft, material, and collaboration.
+              We supply and install premium flooring, carpets, wall panels, and interior surfaces
+              crafted to elevate modern residential and commercial spaces. Every detail is chosen
+              with precision, quality, and timeless design in mind.
             </p>
           </div>
         </motion.div>

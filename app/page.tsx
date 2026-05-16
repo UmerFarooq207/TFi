@@ -158,9 +158,9 @@ export default function HomePage() {
             </span>
           </Reveal>
           <h2>
-            <Reveal><span>Material first. Detail always.</span></Reveal>
+            <Reveal><span>Crafted with Detail.</span></Reveal>
             <br />
-            <Reveal delay={0.08}><span>Trends, never.</span></Reveal>
+            <Reveal delay={0.08}><span>Made to Last.</span></Reveal>
           </h2>
           <FadeUp delay={0.18}>
             <Link href="/calculator" className="tfi-pill">
@@ -175,7 +175,7 @@ export default function HomePage() {
         <StaggerItem><div><div className="num">120+</div><div className="lbl">Finishes across floors, panels, surfaces</div></div></StaggerItem>
         <StaggerItem><div><div className="num">15 yr</div><div className="lbl">Warranty on commercial installations</div></div></StaggerItem>
         <StaggerItem><div><div className="num">FSC</div><div className="lbl">All timber sourced from certified forests</div></div></StaggerItem>
-        <StaggerItem><div><div className="num">PK</div><div className="lbl">Karachi showroom + nationwide trade</div></div></StaggerItem>
+        <StaggerItem><div><div className="num">UK</div><div className="lbl">Birmingham showroom + UK-wide trade</div></div></StaggerItem>
       </StaggerGroup>
 
       <HomeExtras />

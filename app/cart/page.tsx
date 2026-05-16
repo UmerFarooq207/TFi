@@ -13,11 +13,16 @@ import { motion, AnimatePresence } from "framer-motion"
 import { toStoredImageUrl } from "@/lib/image-url"
 import { useCartStore } from "@/store/cart"
 import { TfiCartButton } from "@/components/tfi-cart-button"
+import {
+  quoteDelivery,
+  isValidUkPostcode,
+  STANDARD_FEE,
+  type DeliveryQuote,
+} from "@/lib/delivery"
 
 const fmt = (n: number) =>
   `£${n.toLocaleString("en-GB", { maximumFractionDigits: 0 })}`
 
-const DELIVERY = 4500
 const TAX_RATE = 0.18
 
 type Stage = "cart" | "checkout" | "payment"
@@ -73,6 +78,9 @@ export default function CartFlowPage() {
   const [appliedPromo, setAppliedPromo] = useState<AppliedPromo | null>(null)
   const [promoError, setPromoError] = useState<string | null>(null)
 
+  // Delivery quote derived from the postcode entered at checkout
+  const [deliveryQuote, setDeliveryQuote] = useState<DeliveryQuote | null>(null)
+
   useEffect(() => setMounted(true), [])
 
   const subtotal = mounted ? getTotal() : 0
@@ -85,7 +93,8 @@ export default function CartFlowPage() {
     : 0
 
   const tax = Math.max(0, subtotal - discount) * TAX_RATE
-  const delivery = items.length > 0 ? DELIVERY : 0
+  // Default to the standard UK rate until a valid postcode resolves to a local quote
+  const delivery = items.length > 0 ? (deliveryQuote?.fee ?? STANDARD_FEE) : 0
   const total = items.length > 0 ? Math.max(0, subtotal - discount) + delivery + tax : 0
 
   // Drop promo if cart empties
@@ -390,7 +399,7 @@ export default function CartFlowPage() {
                   <ul className="cart-summary__perks">
                     <li><span className="perk-mark" aria-hidden>◆</span>Free trade fittings consult</li>
                     <li><span className="perk-mark" aria-hidden>◆</span>15-year commercial warranty</li>
-                    <li><span className="perk-mark" aria-hidden>◆</span>Nationwide delivery, FSC certified</li>
+                    <li><span className="perk-mark" aria-hidden>◆</span>UK-wide delivery, FSC certified</li>
                   </ul>
 
                   <p className="cart-summary__note">
@@ -432,6 +441,8 @@ export default function CartFlowPage() {
                 discount={discount}
                 subtotal={subtotal}
                 delivery={delivery}
+                deliveryQuote={deliveryQuote}
+                onDeliveryQuoteChange={setDeliveryQuote}
                 tax={tax}
                 total={total}
               />
@@ -488,6 +499,8 @@ function CheckoutStage({
   discount,
   subtotal,
   delivery,
+  deliveryQuote,
+  onDeliveryQuoteChange,
   tax,
   total,
 }: {
@@ -505,17 +518,59 @@ function CheckoutStage({
   discount: number
   subtotal: number
   delivery: number
+  deliveryQuote: DeliveryQuote | null
+  onDeliveryQuoteChange: (q: DeliveryQuote | null) => void
   tax: number
   total: number
 }) {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<CheckoutData>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: initial ?? { country: "United Kingdom", email: "", firstName: "", lastName: "", address: "", city: "", postcode: "" },
   })
+
+  const postcodeValue = watch("postcode") ?? ""
+  const countryValue = watch("country")
+  const [quotingDelivery, setQuotingDelivery] = useState(false)
+
+  // Debounced postcode → delivery fee lookup
+  useEffect(() => {
+    if (countryValue && countryValue !== "United Kingdom") {
+      // Non-UK addresses skip the postcode lookup; standard fee applies via parent default
+      onDeliveryQuoteChange(null)
+      setQuotingDelivery(false)
+      return
+    }
+    const trimmed = postcodeValue.trim()
+    if (!trimmed) {
+      onDeliveryQuoteChange(null)
+      setQuotingDelivery(false)
+      return
+    }
+    if (!isValidUkPostcode(trimmed)) {
+      onDeliveryQuoteChange(null)
+      setQuotingDelivery(false)
+      return
+    }
+    const controller = new AbortController()
+    setQuotingDelivery(true)
+    const t = setTimeout(async () => {
+      try {
+        const q = await quoteDelivery(trimmed, controller.signal)
+        onDeliveryQuoteChange(q)
+      } finally {
+        setQuotingDelivery(false)
+      }
+    }, 400)
+    return () => {
+      clearTimeout(t)
+      controller.abort()
+    }
+  }, [postcodeValue, countryValue, onDeliveryQuoteChange])
 
   return (
     <form onSubmit={handleSubmit(onContinue)} className="cart-list" style={{ gridColumn: "1 / -1" }}>
@@ -551,7 +606,7 @@ function CheckoutStage({
           <div className="ck2__row ck2__row--full">
             <select {...register("country")}>
               <option>United Kingdom</option>
-              <option>Pakistan</option>
+              <option>Ireland</option>
               <option>United Arab Emirates</option>
               <option>Saudi Arabia</option>
               <option>United States</option>
@@ -609,7 +664,23 @@ function CheckoutStage({
             {appliedPromo && (
               <div className="ck2__discount"><dt>Promo · {appliedPromo.code}</dt><dd>− {fmt(discount)}</dd></div>
             )}
-            <div><dt>Delivery</dt><dd>{fmt(delivery)}</dd></div>
+            <div>
+              <dt>
+                Delivery
+                {countryValue === "United Kingdom" && (
+                  <span style={{ display: "block", fontSize: 11, opacity: 0.65, marginTop: 2 }}>
+                    {quotingDelivery
+                      ? "Calculating…"
+                      : deliveryQuote?.band === "local"
+                        ? "Birmingham · within 10 mi"
+                        : deliveryQuote?.band === "uk"
+                          ? "UK-wide"
+                          : "Enter postcode for accurate rate"}
+                  </span>
+                )}
+              </dt>
+              <dd>{fmt(delivery)}</dd>
+            </div>
             <div><dt>Tax (18%)</dt><dd>{fmt(tax)}</dd></div>
           </dl>
           <div className="ck2__summary-total">

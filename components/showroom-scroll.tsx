@@ -95,7 +95,7 @@ export function ShowroomScroll() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/assets/image2.jpg"
-            alt="TFi showroom — Karachi"
+            alt="TFi showroom — Birmingham"
             loading="lazy"
           />
           <motion.span className="showroom-pin__overlay" style={{ opacity: overlay }} aria-hidden />
@@ -105,8 +105,8 @@ export function ShowroomScroll() {
             style={{ opacity: captionOpacity, y: captionY }}
           >
             <FadeUp>
-              <div className="lbl">Karachi · Clifton</div>
-              <div className="val">123 Design District, Clifton<br />Karachi 75600, Pakistan</div>
+              <div className="lbl">Birmingham · Hamstead</div>
+              <div className="val">Austin Way, Hamstead<br />Birmingham B42 1AD, United Kingdom</div>
               <Link href="/contact" className="tfi-pill" style={{ marginTop: 18 }}>
                 <span className="arrow">↳</span>Plan a visit
               </Link>

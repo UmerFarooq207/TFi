@@ -129,9 +129,16 @@ export function Footer() {
             </h4>
             <address className="not-italic space-y-3 text-sm text-muted-foreground">
               <p className="leading-relaxed">
-                123 Design District,<br />
-                Clifton, Karachi 75600<br />
-                Pakistan
+                <a
+                  href="https://maps.app.goo.gl/QqCRAXjHXSwvAeueA"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors duration-200"
+                >
+                  Austin Way, Hamstead<br />
+                  Birmingham B42 1AD<br />
+                  United Kingdom
+                </a>
               </p>
               <p>
                 <a

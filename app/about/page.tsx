@@ -65,7 +65,7 @@ export default function AboutPage() {
 
           <FadeIn delay={0.2}>
             <p className="mt-8 text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
-              Fifteen years of transforming interiors across Pakistan — from private residences
+              Fifteen years of transforming interiors across the UK — from private residences
               to landmark commercial projects.
             </p>
           </FadeIn>
@@ -112,12 +112,12 @@ export default function AboutPage() {
                 <p>
                   TFi was founded in 2010 with a simple belief: that the materials underfoot and
                   around you shape how you feel in a space. Our founder, having spent years
-                  sourcing surfaces across Europe and South Asia, saw a gap in the Pakistani
+                  sourcing surfaces across Europe and South Asia, saw a gap in the UK
                   market for genuinely premium, well-installed interior materials.
                 </p>
                 <p>
-                  From a single showroom in Karachi&apos;s DHA, we have grown to serve
-                  residential and commercial clients across Pakistan. Our team of specialists
+                  From a single showroom in Birmingham, we have grown to serve
+                  residential and commercial clients across the UK. Our team of specialists
                   handles everything from material selection and space planning to precision
                   installation and aftercare.
                 </p>

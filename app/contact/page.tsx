@@ -23,20 +23,26 @@ export default function ContactPage() {
 
         <div className="ct__grid">
           <div>
-            <div className="ct__map">
+            <a
+              href="https://maps.app.goo.gl/QqCRAXjHXSwvAeueA"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ct__map"
+              aria-label="Open showroom location in Google Maps"
+            >
               <div className="ct__pin">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6">
                   <path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10z" />
                   <circle cx="12" cy="11" r="2.5" />
                 </svg>
               </div>
-            </div>
+            </a>
             <div className="ct__addr">
               <div>
                 <div className="lbl">Showroom</div>
                 <div>
-                  123 Design District, Clifton<br />
-                  Karachi 75600, Pakistan
+                  Austin Way, Hamstead<br />
+                  Birmingham B42 1AD, United Kingdom
                 </div>
               </div>
               <div>

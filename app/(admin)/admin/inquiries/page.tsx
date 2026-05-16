@@ -38,6 +38,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import type { Inquiry, InquiryStatus } from "@/lib/models/inquiry"
 import { ADMIN_INQUIRY_STATUS_BADGE } from "@/lib/admin-status-badges"
+import { markSeen, SEEN_KEY_INQUIRIES } from "@/lib/admin-seen"
 
 type FilterStatus = "all" | InquiryStatus
 
@@ -173,6 +174,7 @@ export default function AdminInquiriesPage() {
 
   useEffect(() => {
     fetchInquiries()
+    markSeen(SEEN_KEY_INQUIRIES)
   }, [])
 
   async function handleUpdate(id: string, patch: Partial<Inquiry>) {

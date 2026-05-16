@@ -8,6 +8,11 @@ import { Reveal, FadeUp, StaggerGroup, StaggerItem } from "@/components/reveal"
 import { TfiCartButton } from "@/components/tfi-cart-button"
 import { useCartStore } from "@/store/cart"
 import type { Product } from "@/lib/models/product"
+import {
+  quoteDelivery,
+  isValidUkPostcode,
+  type DeliveryQuote,
+} from "@/lib/delivery"
 
 const fmt = (n: number) =>
   `£${n.toLocaleString("en-GB", { maximumFractionDigits: 0 })}`
@@ -48,7 +53,7 @@ const STEPS = [
 const FAQS = [
   { q: "Is this estimate binding?",            a: "It's a quick guide. For a binding figure we'll review subfloor, prep, access, and delivery — usually within a working day." },
   { q: "What's wastage?",                      a: "An allowance for cuts, breaks, and pattern matching. 10% covers most rooms; herringbone and tile bias may need 15%." },
-  { q: "Do you deliver outside Karachi?",       a: "Yes — nationwide for trade. Delivery is calculated by postcode and weight at checkout." },
+  { q: "Do you deliver outside Birmingham?",    a: "Yes — UK-wide for trade. Delivery is calculated by postcode and weight at checkout." },
   { q: "Can I add the result to my cart?",      a: "Yes. Hit Add to cart and we'll convert m² to packs based on the product unit, rounded up." },
 ]
 
@@ -66,8 +71,39 @@ export function Calculator() {
   const [underlay, setUnderlay] = useState<string>("")
   const [fitting, setFitting] = useState<string>("")
   const [postcode, setPostcode] = useState("")
+  const [deliveryQuote, setDeliveryQuote] = useState<DeliveryQuote | null>(null)
+  const [quotingDelivery, setQuotingDelivery] = useState(false)
 
   const { addItem, toggleCart } = useCartStore()
+
+  // Debounced postcode → delivery fee lookup (postcodes.io)
+  useEffect(() => {
+    const trimmed = postcode.trim()
+    if (!trimmed) {
+      setDeliveryQuote(null)
+      setQuotingDelivery(false)
+      return
+    }
+    if (!isValidUkPostcode(trimmed)) {
+      setDeliveryQuote(null)
+      setQuotingDelivery(false)
+      return
+    }
+    const controller = new AbortController()
+    setQuotingDelivery(true)
+    const t = setTimeout(async () => {
+      try {
+        const q = await quoteDelivery(trimmed, controller.signal)
+        setDeliveryQuote(q)
+      } finally {
+        setQuotingDelivery(false)
+      }
+    }, 400)
+    return () => {
+      clearTimeout(t)
+      controller.abort()
+    }
+  }, [postcode])
 
   useEffect(() => {
     let cancelled = false
@@ -111,7 +147,8 @@ export function Calculator() {
   const matCost = product ? matArea * product.price : 0
   const underCost = matArea * underlayN
   const fitCost = area * fittingN
-  const total = matCost + underCost + fitCost
+  const deliveryFee = deliveryQuote?.fee ?? 0
+  const total = matCost + underCost + fitCost + deliveryFee
 
   const handleAdd = () => {
     if (!product) {
@@ -207,8 +244,8 @@ export function Calculator() {
             </StaggerItem>
             <StaggerItem>
               <div>
-                <div className="est-trust__num">PK</div>
-                <div className="est-trust__lbl">Nationwide delivery</div>
+                <div className="est-trust__num">UK</div>
+                <div className="est-trust__lbl">UK-wide delivery</div>
               </div>
             </StaggerItem>
           </StaggerGroup>
@@ -320,7 +357,7 @@ export function Calculator() {
                 <input
                   id="post"
                   type="text"
-                  placeholder="e.g. 75600"
+                  placeholder="e.g. B42 1AD"
                   value={postcode}
                   onChange={(e) => setPostcode(e.target.value)}
                 />
@@ -345,6 +382,22 @@ export function Calculator() {
               <div className="est-summary__row">
                 <span className="est-summary__label">Fitting</span>
                 <span className="est-summary__value">{fmt(fitCost)}</span>
+              </div>
+              <div className="est-summary__row">
+                <span className="est-summary__label">Delivery</span>
+                <span className="est-summary__value">
+                  {!postcode.trim()
+                    ? "Enter postcode"
+                    : !isValidUkPostcode(postcode)
+                      ? "Enter a valid UK postcode"
+                      : quotingDelivery || !deliveryQuote
+                        ? "Calculating…"
+                        : `${fmt(deliveryQuote.fee)} · ${
+                            deliveryQuote.band === "local"
+                              ? "Birmingham (within 10 mi)"
+                              : "UK-wide"
+                          }`}
+                </span>
               </div>
               <div className="est-summary__row est-summary__row--total">
                 <span className="est-summary__label">Estimate</span>

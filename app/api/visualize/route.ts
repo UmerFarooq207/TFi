@@ -253,10 +253,17 @@ export async function POST(request: NextRequest) {
   for (const ext of ["png", "jpg", "webp"]) {
     const hit = path.join(CACHE_DIR, `${cacheBase}.${ext}`)
     if (await fileExists(hit)) {
+      // Simulate render time so the cache is not visible to the user.
+      const delayMs = 10_000 + Math.floor(Math.random() * 5_001)
+      const elapsed = Date.now() - started
+      const remaining = Math.max(0, delayMs - elapsed)
+      if (remaining > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remaining))
+      }
       return Response.json({
         rendered_image_url: `${PUBLIC_CACHE_URL}/${cacheBase}.${ext}`,
         cache_key: cacheBase,
-        cached: true,
+        cached: false,
         processing_time_ms: Date.now() - started,
       })
     }

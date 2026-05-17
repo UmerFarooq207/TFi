@@ -39,6 +39,7 @@ import { Label } from "@/components/ui/label"
 import type { Inquiry, InquiryStatus } from "@/lib/models/inquiry"
 import { ADMIN_INQUIRY_STATUS_BADGE } from "@/lib/admin-status-badges"
 import { markSeen, SEEN_KEY_INQUIRIES } from "@/lib/admin-seen"
+import { API_ERROR_MESSAGE } from "@/lib/api-errors"
 
 type FilterStatus = "all" | InquiryStatus
 
@@ -190,7 +191,7 @@ export default function AdminInquiriesPage() {
       )
       toast.success("Inquiry updated")
     } else {
-      toast.error("Failed to update inquiry")
+      toast.error(API_ERROR_MESSAGE)
     }
   }
 
@@ -200,7 +201,7 @@ export default function AdminInquiriesPage() {
       setInquiries((prev) => prev.filter((q) => String(q._id) !== id))
       toast.success("Inquiry deleted")
     } else {
-      toast.error("Failed to delete inquiry")
+      toast.error(API_ERROR_MESSAGE)
     }
   }
 

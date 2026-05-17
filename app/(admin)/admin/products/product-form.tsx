@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select"
 import type { Product } from "@/lib/models/product"
 import { toStoredImageUrl } from "@/lib/image-url"
+import { API_ERROR_MESSAGE } from "@/lib/api-errors"
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -157,7 +158,7 @@ export function ProductForm({ product }: ProductFormProps) {
       setImages((prev) => [...prev, ...uploadedIds])
       toast.success(`${uploadedIds.length} image${uploadedIds.length === 1 ? "" : "s"} uploaded`)
     } catch {
-      toast.error("Failed to upload one or more images")
+      toast.error(API_ERROR_MESSAGE)
     } finally {
       setUploading(false)
     }
@@ -196,7 +197,7 @@ export function ProductForm({ product }: ProductFormProps) {
       toast.success(isEditing ? "Product updated" : "Product created")
       router.push("/admin/products")
     } else {
-      toast.error("Failed to save product")
+      toast.error(API_ERROR_MESSAGE)
     }
     setSubmitting(false)
   }

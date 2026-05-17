@@ -23,6 +23,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toStoredImageUrl } from "@/lib/image-url"
 import type { Product } from "@/lib/models/product"
+import { API_ERROR_MESSAGE } from "@/lib/api-errors"
 
 type FilterCategory = "all" | "flooring" | "wall-paneling" | "kitchen"
 
@@ -58,7 +59,7 @@ export default function AdminProductsPage() {
       toast.success("Product deleted")
       setProducts((prev) => prev.filter((p) => p.slug !== slug))
     } else {
-      toast.error("Failed to delete product")
+      toast.error(API_ERROR_MESSAGE)
     }
     setDeletingSlug(null)
   }

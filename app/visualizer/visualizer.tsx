@@ -19,6 +19,7 @@ import {
   publicRoomUrl,
   type VisualizerRoom,
 } from "@/lib/visualizer-rooms"
+import { API_ERROR_MESSAGE } from "@/lib/api-errors"
 
 type Tone = "all" | "light" | "mid" | "dark"
 
@@ -69,7 +70,6 @@ export function Visualizer() {
   const [renderLoading, setRenderLoading] = useState(false)
   const [renderError, setRenderError] = useState<string | null>(null)
   const [renderMs, setRenderMs] = useState<number | null>(null)
-  const [renderCached, setRenderCached] = useState(false)
   const renderRequestId = useRef(0)
   const renderAbortRef = useRef<AbortController | null>(null)
 
@@ -85,7 +85,6 @@ export function Visualizer() {
     setRenderedKey(null)
     setRenderError(null)
     setRenderMs(null)
-    setRenderCached(false)
     setRenderLoading(false)
   }, [isStale])
 
@@ -115,18 +114,15 @@ export function Visualizer() {
       if (id !== renderRequestId.current) return
 
       if (!res.ok) {
-        const detail =
-          (data && (data.detail || data.error)) || `Render failed (${res.status})`
-        throw new Error(typeof detail === "string" ? detail : JSON.stringify(detail))
+        throw new Error(API_ERROR_MESSAGE)
       }
 
       if (!data?.rendered_image_url) {
-        throw new Error("Render response did not include an image")
+        throw new Error(API_ERROR_MESSAGE)
       }
 
       setRenderedUrl(data.rendered_image_url)
       setRenderedKey(key)
-      setRenderCached(Boolean(data.cached))
       setRenderMs(
         typeof data.processing_time_ms === "number" ? data.processing_time_ms : null
       )
@@ -135,7 +131,7 @@ export function Visualizer() {
       if (err instanceof DOMException && err.name === "AbortError") return
       setRenderedUrl(null)
       setRenderedKey(null)
-      setRenderError(err instanceof Error ? err.message : "Render failed")
+      setRenderError(API_ERROR_MESSAGE)
     } finally {
       if (id === renderRequestId.current) setRenderLoading(false)
     }
@@ -236,27 +232,6 @@ export function Visualizer() {
 
           <div className="viz-stage__upload">
             <div className="viz-stage__upload-status">
-              <ul className="viz-rooms" role="radiogroup" aria-label="Preset rooms">
-                {VISUALIZER_ROOMS.map((r) => {
-                  const isActive = r.id === room.id
-                  return (
-                    <li key={r.id}>
-                      <button
-                        type="button"
-                        role="radio"
-                        aria-checked={isActive}
-                        className={`viz-rooms__btn${isActive ? " is-active" : ""}`}
-                        onClick={() => setRoom(r)}
-                        title={r.name}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={publicRoomUrl(r)} alt="" loading="lazy" />
-                        <span className="viz-rooms__label">{r.name}</span>
-                      </button>
-                    </li>
-                  )
-                })}
-              </ul>
               {renderLoading ? (
                 <span className="viz-stage__chip">
                   Generating with {floor?.name ?? "your selection"}…
@@ -264,7 +239,7 @@ export function Visualizer() {
               ) : renderedUrl ? (
                 <span className="viz-stage__chip viz-stage__chip--ok">
                   <Sparkles size={12} strokeWidth={1.8} />
-                  {renderCached ? "Cached render" : "AI render"}
+                  AI render
                   {renderMs !== null && <em>{(renderMs / 1000).toFixed(1)}s</em>}
                 </span>
               ) : floor?.textureUrl ? (
@@ -305,6 +280,37 @@ export function Visualizer() {
 
       {/* ============ RAIL ============ */}
       <aside className="viz-rail">
+        <section className="viz-rail__rooms" aria-label="Rooms">
+          <div className="viz-rail__rooms-head">
+            <span className="viz-rail__tab-label">Rooms</span>
+          </div>
+          <ul
+            className="viz-rail__rooms-grid"
+            role="radiogroup"
+            aria-label="Preset rooms"
+          >
+            {VISUALIZER_ROOMS.map((r) => {
+              const isActive = r.id === room.id
+              return (
+                <li key={r.id}>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={isActive}
+                    className={`viz-rail__room-btn${isActive ? " is-active" : ""}`}
+                    onClick={() => setRoom(r)}
+                    title={r.name}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={publicRoomUrl(r)} alt="" loading="lazy" />
+                    <span className="viz-rail__room-label">{r.name}</span>
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+
         <nav className="viz-rail__tabs">
           <span className="viz-rail__tab-label">Flooring designs</span>
           <button

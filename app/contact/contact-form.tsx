@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { API_ERROR_MESSAGE } from "@/lib/api-errors"
 
 type FormState = {
   name: string
@@ -45,14 +46,13 @@ export function ContactForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       })
-      const data = await res.json()
       if (!res.ok) {
-        setError(data.error || "Failed to send message")
+        setError(API_ERROR_MESSAGE)
         return
       }
       setSubmitted(true)
     } catch {
-      setError("Something went wrong. Please try again.")
+      setError(API_ERROR_MESSAGE)
     } finally {
       setLoading(false)
     }

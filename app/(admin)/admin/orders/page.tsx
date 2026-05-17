@@ -28,6 +28,7 @@ import { toStoredImageUrl } from "@/lib/image-url"
 import type { Order, OrderStatus } from "@/lib/models/order"
 import { ADMIN_ORDER_STATUS_BADGE } from "@/lib/admin-status-badges"
 import { markSeen, SEEN_KEY_ORDERS } from "@/lib/admin-seen"
+import { API_ERROR_MESSAGE } from "@/lib/api-errors"
 
 type FilterStatus = "all" | OrderStatus
 
@@ -159,7 +160,7 @@ export default function AdminOrdersPage() {
       )
       toast.success("Order status updated")
     } else {
-      toast.error("Failed to update status")
+      toast.error(API_ERROR_MESSAGE)
     }
   }
 

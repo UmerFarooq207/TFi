@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
+import { API_ERROR_MESSAGE } from "@/lib/api-errors"
 import {
   Select,
   SelectContent,
@@ -103,7 +104,7 @@ export default function AdminPromosPage() {
       reset({ code: "", type: "percent", value: 10 })
       fetchPromos()
     } else {
-      toast.error(json.error || "Failed to create promo")
+      toast.error(API_ERROR_MESSAGE)
     }
     setSubmitting(false)
   }
@@ -118,7 +119,7 @@ export default function AdminPromosPage() {
       const updated = await res.json()
       setPromos((prev) => prev.map((p) => (String(p._id) === String(promo._id) ? updated : p)))
     } else {
-      toast.error("Failed to update promo")
+      toast.error(API_ERROR_MESSAGE)
     }
   }
 
@@ -129,7 +130,7 @@ export default function AdminPromosPage() {
       setPromos((prev) => prev.filter((p) => String(p._id) !== id))
       toast.success("Promo deleted")
     } else {
-      toast.error("Failed to delete promo")
+      toast.error(API_ERROR_MESSAGE)
     }
     setDeletingId(null)
   }

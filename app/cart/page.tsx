@@ -19,6 +19,7 @@ import {
   STANDARD_FEE,
   type DeliveryQuote,
 } from "@/lib/delivery"
+import { API_ERROR_MESSAGE } from "@/lib/api-errors"
 
 const fmt = (n: number) =>
   `£${n.toLocaleString("en-GB", { maximumFractionDigits: 0 })}`
@@ -141,9 +142,9 @@ export default function CartFlowPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code, subtotal }),
       })
-      const json = await res.json()
+      const json = await res.json().catch(() => null)
       if (!res.ok) {
-        setPromoError(json.error || "Invalid promo code")
+        setPromoError(API_ERROR_MESSAGE)
         setAppliedPromo(null)
       } else {
         setAppliedPromo({
@@ -155,7 +156,7 @@ export default function CartFlowPage() {
         toast.success(`Promo ${json.code} applied`)
       }
     } catch {
-      setPromoError("Failed to validate promo")
+      setPromoError(API_ERROR_MESSAGE)
     } finally {
       setApplyingPromo(false)
     }
@@ -200,14 +201,14 @@ export default function CartFlowPage() {
         }),
       })
 
-      if (!res.ok) throw new Error("Order failed")
+      if (!res.ok) throw new Error(API_ERROR_MESSAGE)
       const order = await res.json()
       clearCart()
       router.push(
         `/order-confirmed?orderNumber=${order.orderNumber}&name=${encodeURIComponent(savedCheckout.firstName)}`
       )
     } catch {
-      toast.error("Failed to place order. Please try again.")
+      toast.error(API_ERROR_MESSAGE)
     } finally {
       setSubmitting(false)
     }

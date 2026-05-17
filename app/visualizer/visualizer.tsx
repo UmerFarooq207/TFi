@@ -3,12 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import {
+  ArrowLeft,
   ChevronsLeft,
   ChevronsRight,
   Info,
   RotateCcw,
   Search,
-  Sparkles,
   Star,
   Wand2,
 } from "lucide-react"
@@ -199,8 +199,22 @@ export function Visualizer() {
 
   const canRender = Boolean(floor?.textureUrl) && !renderLoading
 
+  // On phones/tablets the rail covers the canvas — collapse it so the
+  // user sees the AI render as it loads.
+  const handleVisualize = useCallback(() => {
+    if (typeof window !== "undefined" && window.innerWidth <= 1024) {
+      setRailOpen(false)
+    }
+    runRender()
+  }, [runRender])
+
   return (
     <div className={`viz-shell${railOpen ? "" : " viz-shell--collapsed"}`}>
+      <Link href="/" className="viz-back" aria-label="Back to home">
+        <ArrowLeft size={14} strokeWidth={1.8} aria-hidden />
+        <span className="viz-back__label">Back to home</span>
+      </Link>
+
       {/* ============ STAGE ============ */}
       <section className="viz-stage">
         <div className="viz-stage__canvas">
@@ -236,36 +250,6 @@ export function Visualizer() {
             </h1>
           </header>
 
-          <div className="viz-stage__upload">
-            <div className="viz-stage__upload-status">
-              {renderLoading ? (
-                <span className="viz-stage__chip">
-                  Generating with {floor?.name ?? "your selection"}…
-                </span>
-              ) : renderedUrl ? (
-                <span className="viz-stage__chip viz-stage__chip--ok">
-                  <Sparkles size={12} strokeWidth={1.8} />
-                  AI render
-                  {renderMs !== null && <em>{(renderMs / 1000).toFixed(1)}s</em>}
-                </span>
-              ) : floor?.textureUrl ? (
-                <span className="viz-stage__chip">Ready — click Visualize</span>
-              ) : (
-                <span className="viz-stage__chip">
-                  Pick a flooring to apply AI render
-                </span>
-              )}
-              <button
-                type="button"
-                className="viz-stage__upload-btn viz-stage__upload-btn--primary"
-                onClick={runRender}
-                disabled={!canRender}
-              >
-                <Wand2 size={13} strokeWidth={1.7} />
-                {renderLoading ? "Visualizing…" : "Visualize"}
-              </button>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -439,9 +423,15 @@ export function Visualizer() {
               <span className="val">{floor?.name ?? "None"}</span>
             </div>
           </div>
-          <Link href="/contact" className="tfi-pill viz-rail__cta">
-            <span className="arrow">↳</span>Save selection
-          </Link>
+          <button
+            type="button"
+            className="tfi-pill viz-rail__cta"
+            onClick={handleVisualize}
+            disabled={!canRender}
+          >
+            <Wand2 size={13} strokeWidth={1.7} />
+            {renderLoading ? "Visualizing…" : "Visualize"}
+          </button>
         </footer>
       </aside>
     </div>

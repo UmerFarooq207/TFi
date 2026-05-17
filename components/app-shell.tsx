@@ -37,7 +37,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <PageTransition>{children}</PageTransition>
       </main>
       {!isVisualizer && <TfiFooter />}
-      <TfiDock />
+      {!isVisualizer && <TfiDock />}
       <CartDrawer />
     </>
   )

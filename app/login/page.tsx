@@ -5,7 +5,11 @@ import Image from "next/image"
 import { LoginForm } from "./login-form"
 
 export const metadata: Metadata = {
-  title: "Admin Sign In",
+  title: { absolute: "Admin Sign In | TFi Floors and Interiors" },
+  description:
+    "Restricted admin sign-in for TFi Floors and Interiors staff to manage products, orders and customer enquiries.",
+  alternates: { canonical: "/login" },
+  robots: { index: false, follow: false },
 }
 
 export default function LoginPage() {

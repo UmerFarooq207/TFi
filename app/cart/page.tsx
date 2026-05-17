@@ -380,12 +380,11 @@ export default function CartFlowPage() {
                   <h3 className="cart-summary__heading">What you&apos;ll pay.</h3>
                   <dl className="cart-summary__list">
                     <div><dt>Subtotal</dt><dd>{fmt(subtotal)}</dd></div>
-                    <div><dt>Delivery</dt><dd>{items.length > 0 ? fmt(delivery) : "—"}</dd></div>
                     <div><dt>Tax (18%)</dt><dd>{fmt(tax)}</dd></div>
                   </dl>
                   <div className="cart-summary__total">
                     <span>Total</span>
-                    <span>{fmt(total)}</span>
+                    <span>{fmt(Math.max(0, subtotal - discount) + tax)}</span>
                   </div>
 
                   <button
@@ -404,8 +403,8 @@ export default function CartFlowPage() {
                   </ul>
 
                   <p className="cart-summary__note">
-                    Trade pricing and delivery surcharges are reviewed at checkout — usually within
-                    one business day.
+                    Delivery is calculated at checkout once you enter your postcode. Trade pricing
+                    and surcharges are reviewed within one business day.
                   </p>
                 </div>
               </aside>
@@ -607,10 +606,6 @@ function CheckoutStage({
           <div className="ck2__row ck2__row--full">
             <select {...register("country")}>
               <option>United Kingdom</option>
-              <option>Ireland</option>
-              <option>United Arab Emirates</option>
-              <option>Saudi Arabia</option>
-              <option>United States</option>
             </select>
           </div>
 

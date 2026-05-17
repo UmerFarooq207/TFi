@@ -145,13 +145,14 @@ function ProductsInner() {
           </div>
         </FadeUp>
         <h1 className="col-hero__title">
-          <Reveal><span>Explore Our </span></Reveal>
-          <Reveal delay={0.06}><span>Collections.</span></Reveal>
+          <Reveal><span>Shop Premium Flooring </span></Reveal>
+          <Reveal delay={0.06}><span>&amp; Wall Paneling.</span></Reveal>
         </h1>
         <FadeUp delay={0.12}>
           <p className="col-hero__sub">
-            Browse by brand, narrow to a category, then drill into a single collection.
-            Filter, sort, and add to cart in one step.
+            Shop premium engineered oak flooring, acoustic wall panels, microcement and stone
+            surfaces. Browse by brand, narrow to a category, then drill into a single TFi
+            collection — filter, sort and add to cart in one step.
           </p>
         </FadeUp>
       </section>
@@ -304,7 +305,7 @@ function ProductsInner() {
       {/* ============ CTA BAND ============ */}
       <section className="col-cta">
         <FadeUp>
-          <h2>Can&apos;t find what you&apos;re after?</h2>
+          <h2>Looking for a specific material or finish?</h2>
         </FadeUp>
         <FadeUp delay={0.1}>
           <div className="col-cta__row">

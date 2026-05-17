@@ -5,9 +5,28 @@ import { Button } from "@/components/ui/button"
 import { FadeIn } from "@/components/fade-in"
 
 export const metadata: Metadata = {
-  title: "About",
+  title: { absolute: "UK Interior Specialists Since 2010 | About TFi Floors and Interiors" },
   description:
-    "TFi has been shaping refined interiors since 2010. Learn about our story, values, and commitment to craft.",
+    "TFi Floors and Interiors has been a trusted UK interior specialist since 2010 — supplying and installing premium engineered oak flooring, acoustic wall panels and bespoke kitchens from our Birmingham showroom for 500+ residential and commercial projects nationwide.",
+  keywords: [
+    "UK interior specialists",
+    "about TFi Floors and Interiors",
+    "Birmingham flooring company",
+    "UK flooring specialist since 2010",
+    "premium interior materials UK",
+    "wall paneling installers UK",
+    "engineered oak supplier UK",
+    "commercial flooring contractor UK",
+    "interior fit-out Birmingham",
+  ],
+  alternates: { canonical: "/about" },
+  openGraph: {
+    title: "UK Interior Specialists Since 2010 | About TFi Floors and Interiors",
+    description:
+      "Trusted UK interior specialist since 2010 — premium flooring, acoustic wall panels and bespoke kitchens from our Birmingham showroom.",
+    url: "/about",
+    type: "website",
+  },
 }
 
 const values = [
@@ -56,17 +75,18 @@ export default function AboutPage() {
           <FadeIn>
             <p className="text-xs tracking-[0.3em] uppercase text-accent mb-6">About TFi</p>
             <h1 className="font-heading font-medium text-foreground leading-tight">
-              <span className="block text-5xl md:text-6xl lg:text-7xl">Built on</span>
+              <span className="block text-5xl md:text-6xl lg:text-7xl">UK Interior</span>
               <span className="block text-5xl md:text-6xl lg:text-7xl italic text-foreground/40">
-                Craft & Conviction
+                Specialists Since 2010
               </span>
             </h1>
           </FadeIn>
 
           <FadeIn delay={0.2}>
             <p className="mt-8 text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
-              Fifteen years of transforming interiors across the UK — from private residences
-              to landmark commercial projects.
+              Fifteen years transforming UK interiors with premium engineered oak flooring,
+              acoustic wall paneling and bespoke kitchen design — from private residences
+              in London and Birmingham to landmark commercial fit-outs nationwide.
             </p>
           </FadeIn>
         </div>
@@ -101,29 +121,32 @@ export default function AboutPage() {
                 Our Story
               </p>
               <h2 className="font-heading text-3xl md:text-4xl font-medium text-foreground leading-snug">
-                We started with a single
+                A Birmingham Showroom
                 <br />
-                <span className="italic text-foreground/40">floor. One decision.</span>
+                <span className="italic text-foreground/40">serving the whole UK.</span>
               </h2>
             </FadeIn>
 
             <FadeIn delay={0.15}>
               <div className="space-y-5 text-muted-foreground text-sm leading-relaxed pt-2 lg:pt-14">
                 <p>
-                  TFi was founded in 2010 with a simple belief: that the materials underfoot and
-                  around you shape how you feel in a space. Our founder, having spent years
-                  sourcing surfaces across Europe and South Asia, saw a gap in the UK
-                  market for genuinely premium, well-installed interior materials.
+                  TFi Floors and Interiors was founded in 2010 with a simple belief: that the
+                  materials underfoot and around you shape how you feel in a space. Our founder,
+                  after years sourcing premium flooring, hardwood surfaces and stone across
+                  Europe and South Asia, saw a gap in the UK market for genuinely high-grade,
+                  well-installed interior materials.
                 </p>
                 <p>
-                  From a single showroom in Birmingham, we have grown to serve
-                  residential and commercial clients across the UK. Our team of specialists
-                  handles everything from material selection and space planning to precision
-                  installation and aftercare.
+                  From a single Birmingham showroom, we have grown into one of the UK&apos;s
+                  trusted suppliers of engineered oak flooring, acoustic wall panels, microcement
+                  surfaces and bespoke kitchens — serving residential and commercial clients
+                  nationwide. Our specialist team handles every stage: material selection, space
+                  planning, precision installation and long-term aftercare.
                 </p>
                 <p>
-                  We work with architects, interior designers, and directly with homeowners —
-                  wherever the project starts, we bring the same standard of care to the finish.
+                  We partner with architects, interior designers and homeowners across the UK —
+                  whether the project starts with a single room refurbishment or a multi-site
+                  commercial fit-out, we bring the same craft standard to the finish.
                 </p>
               </div>
             </FadeIn>
@@ -139,9 +162,9 @@ export default function AboutPage() {
               How We Work
             </p>
             <h2 className="font-heading text-3xl md:text-4xl font-medium text-foreground mb-16">
-              Four principles we
+              Four Principles
               <br />
-              <span className="italic text-foreground/40">never compromise</span>
+              <span className="italic text-foreground/40">We Never Compromise On</span>
             </h2>
           </FadeIn>
 
@@ -172,9 +195,9 @@ export default function AboutPage() {
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
               <div>
                 <h2 className="font-heading text-3xl md:text-4xl font-medium text-foreground">
-                  Let&apos;s build something
+                  Start Your Next
                   <br />
-                  <span className="italic text-foreground/40">remarkable together.</span>
+                  <span className="italic text-foreground/40">Interior Project With Us.</span>
                 </h2>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 shrink-0">

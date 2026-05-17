@@ -5,9 +5,31 @@ import { Button } from "@/components/ui/button"
 import { FadeIn } from "@/components/fade-in"
 
 export const metadata: Metadata = {
-  title: "Services",
+  title: { absolute: "Flooring, Paneling & Bespoke Kitchens UK | TFi Services" },
   description:
-    "Flooring, wall paneling, and kitchen solutions from TFi — premium materials, precision installation.",
+    "TFi UK services: premium engineered oak and luxury vinyl flooring supply and installation, acoustic slat and fluted wall paneling, microcement, stone cladding and bespoke kitchen design across Birmingham, London and the UK.",
+  keywords: [
+    "flooring installation UK",
+    "engineered oak flooring installation",
+    "wall paneling services UK",
+    "acoustic wall panel installation",
+    "fluted wall panels UK",
+    "stone cladding installation",
+    "bespoke kitchen design UK",
+    "shaker kitchen installation",
+    "handleless kitchen UK",
+    "luxury vinyl plank installation",
+    "herringbone flooring installation",
+    "underfloor heating compatible flooring",
+  ],
+  alternates: { canonical: "/services" },
+  openGraph: {
+    title: "Flooring, Paneling & Bespoke Kitchens UK | TFi Services",
+    description:
+      "Premium flooring, acoustic wall paneling and bespoke kitchen services from TFi — UK-wide, Birmingham-based.",
+    url: "/services",
+    type: "website",
+  },
 }
 
 const services = [
@@ -15,9 +37,9 @@ const services = [
     id: "flooring",
     number: "01",
     title: "Flooring Solutions",
-    headline: "The foundation of every refined space.",
+    headline: "Premium UK Flooring Supply & Installation.",
     description:
-      "From wide-plank European oak to Italian porcelain and luxury vinyl plank — we source, specify, and install flooring that performs beautifully for decades. Our team handles site preparation, moisture management, and finishing with equal care.",
+      "From wide-plank European engineered oak flooring to Italian porcelain tile and luxury vinyl plank (LVP), TFi sources, specifies and installs premium UK flooring that performs beautifully for decades. Our team handles site preparation, moisture management, herringbone and chevron pattern installation and finishing — every floor laid to the same exacting standard.",
     gradient:
       "radial-gradient(ellipse 80% 60% at 30% 50%, oklch(0.22 0.025 55), oklch(0.09 0.006 55))",
     features: [
@@ -33,9 +55,9 @@ const services = [
     id: "paneling",
     number: "02",
     title: "Wall Paneling",
-    headline: "Surfaces that command attention.",
+    headline: "Acoustic, Slat & Fluted Wall Panels.",
     description:
-      "Wall paneling transforms architecture. We design and install slatted wood walls, fluted panels, stone cladding, and bespoke 3D feature walls. Each project is custom-fitted to your space, with concealed fixings and seamless edge details.",
+      "Wall paneling transforms architecture. TFi designs and installs slatted timber wall panels, fluted oak panels, acoustic wall systems, stone and marble cladding, and bespoke 3D feature walls across the UK. Every project is custom-fitted to your space with concealed fixings, seamless edge details and full-height panel options for residential and commercial interiors.",
     gradient:
       "radial-gradient(ellipse 80% 60% at 70% 50%, oklch(0.18 0.012 50), oklch(0.09 0.006 55))",
     features: [
@@ -51,9 +73,9 @@ const services = [
     id: "kitchen",
     number: "03",
     title: "Kitchen Solutions",
-    headline: "Where function meets elegance.",
+    headline: "Bespoke Kitchen Design & Installation.",
     description:
-      "We design modular and fully bespoke kitchens — from handleless contemporary to classic shaker. All cabinetry is built to measure, finished in paint, veneer, or lacquer, and paired with countertops in quartz, granite, or engineered stone.",
+      "TFi designs modular and fully bespoke kitchens in the UK — from handleless contemporary to classic shaker styles. All cabinetry is built to measure, finished in paint, hardwood veneer or lacquer, and paired with premium quartz, granite or engineered stone countertops. Integrated appliance planning, custom kitchen islands and splashback tile installation included.",
     gradient:
       "radial-gradient(ellipse 80% 60% at 20% 60%, oklch(0.20 0.015 65), oklch(0.09 0.006 55))",
     features: [
@@ -83,16 +105,17 @@ export default function ServicesPage() {
           <FadeIn>
             <p className="text-xs tracking-[0.3em] uppercase text-accent mb-6">Services</p>
             <h1 className="font-heading font-medium text-foreground leading-tight">
-              <span className="block text-5xl md:text-6xl lg:text-7xl">Three specialisms.</span>
+              <span className="block text-5xl md:text-6xl lg:text-7xl">Flooring, Paneling</span>
               <span className="block text-5xl md:text-6xl lg:text-7xl italic text-foreground/40">
-                One standard.
+                &amp; Bespoke Kitchens
               </span>
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
             <p className="mt-8 text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
-              Flooring, wall paneling, and kitchens — delivered at the same level of precision
-              regardless of scope.
+              Premium flooring, acoustic wall paneling and bespoke kitchen design — supplied,
+              installed and finished to the same precision standard across UK homes, studios
+              and commercial fit-outs, regardless of project scope.
             </p>
           </FadeIn>
         </div>
@@ -177,7 +200,7 @@ export default function ServicesPage() {
               Let&apos;s Talk
             </p>
             <h2 className="font-heading text-4xl md:text-5xl font-medium text-foreground">
-              Not sure where to start?
+              Need help choosing the right materials?
             </h2>
             <p className="mt-5 text-base text-muted-foreground max-w-md mx-auto leading-relaxed">
               Our consultants can help you select the right materials for your space, budget,

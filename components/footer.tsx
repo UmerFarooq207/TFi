@@ -142,18 +142,18 @@ export function Footer() {
               </p>
               <p>
                 <a
-                  href="tel:+923001234567"
+                  href="tel:+447790000007"
                   className="hover:text-foreground transition-colors duration-200"
                 >
-                  +92 300 123 4567
+                  +44 7790 000007
                 </a>
               </p>
               <p>
                 <a
-                  href="mailto:hello@tfi.pk"
+                  href="mailto:info@tfifloorsandinteriors.co.uk"
                   className="hover:text-foreground transition-colors duration-200"
                 >
-                  hello@tfi.pk
+                  info@tfifloorsandinteriors.co.uk
                 </a>
               </p>
               <p className="pt-1 text-xs text-muted-foreground/70">

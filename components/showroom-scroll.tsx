@@ -48,7 +48,7 @@ export function ShowroomScroll() {
         </div>
         <div className="showroom-static__row">
           <div>
-            <h2 className="showroom-static__title">A place where material<br />and craft meet.</h2>
+            <h2 className="showroom-static__title">Visit Our Birmingham<br />Showroom.</h2>
             <Link href="/contact" className="tfi-pill">
               <span className="arrow">↳</span>Visit the showroom
             </Link>
@@ -82,9 +82,9 @@ export function ShowroomScroll() {
             className="showroom-pin__title"
             style={{ opacity: titleOpacity, y: titleY }}
           >
-            <Reveal><span>A place where material</span></Reveal>
+            <Reveal><span>Visit Our Birmingham</span></Reveal>
             <br />
-            <Reveal delay={0.08}><span>and craft meet.</span></Reveal>
+            <Reveal delay={0.08}><span>Showroom.</span></Reveal>
           </motion.div>
         </div>
 

@@ -89,7 +89,7 @@ export function SignupForm() {
         <input
           id="phone"
           type="tel"
-          placeholder="+92 300 000 0000"
+          placeholder="+44 7700 000000"
           autoComplete="tel"
           className="auth-form__input"
           {...register("phone")}

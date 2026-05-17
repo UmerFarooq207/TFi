@@ -3,9 +3,27 @@ import { ContactForm } from "./contact-form"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Contact",
+  title: { absolute: "Get in Touch — Birmingham Showroom & UK Enquiries | Contact TFi" },
   description:
-    "Get in touch with TFi to discuss your flooring, paneling, or surfaces project. We respond within one business day.",
+    "Contact TFi Floors and Interiors on +44 7790 000007 or info@tfifloorsandinteriors.co.uk to discuss your flooring, wall paneling, microcement or bespoke kitchen project. Visit our Birmingham showroom (Hamstead, B42 1AD) — UK residential and trade enquiries answered within one business day.",
+  keywords: [
+    "contact TFi Floors and Interiors",
+    "flooring showroom Birmingham",
+    "wall paneling quote UK",
+    "kitchen design consultation UK",
+    "trade flooring enquiry UK",
+    "TFi Birmingham address",
+    "interior materials showroom Hamstead",
+    "info@tfifloorsandinteriors.co.uk",
+  ],
+  alternates: { canonical: "/contact" },
+  openGraph: {
+    title: "Get in Touch — Birmingham Showroom & UK Enquiries | Contact TFi",
+    description:
+      "Visit our Birmingham flooring and wall paneling showroom or call +44 7790 000007 — UK residential and trade enquiries answered within one business day.",
+    url: "/contact",
+    type: "website",
+  },
 }
 
 export default function ContactPage() {
@@ -19,7 +37,7 @@ export default function ContactPage() {
       </div>
 
       <section className="ct">
-        <h1>Visit the showroom, or send us the room.</h1>
+        <h1>Get in Touch — Birmingham Showroom & UK Enquiries.</h1>
 
         <div className="ct__grid">
           <div>
@@ -54,11 +72,17 @@ export default function ContactPage() {
               </div>
               <div>
                 <div className="lbl">Phone</div>
-                <div>+92 300 123 4567</div>
+                <div>
+                  <a href="tel:+447790000007">+44 7790 000007</a>
+                </div>
               </div>
               <div>
-                <div className="lbl">Trade</div>
-                <div>hello@tfi.pk</div>
+                <div className="lbl">Email</div>
+                <div>
+                  <a href="mailto:info@tfifloorsandinteriors.co.uk">
+                    info@tfifloorsandinteriors.co.uk
+                  </a>
+                </div>
               </div>
             </div>
           </div>

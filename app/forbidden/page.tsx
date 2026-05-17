@@ -4,6 +4,8 @@ import { ShieldAlert } from "lucide-react"
 
 export const metadata = {
   title: "Access Denied",
+  description: "You don't have permission to view this page. The TFi Floors and Interiors admin panel is reserved for authorised staff.",
+  robots: { index: false, follow: false },
 }
 
 export default function ForbiddenPage() {

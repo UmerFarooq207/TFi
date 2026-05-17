@@ -4,7 +4,11 @@ import Image from "next/image"
 import { SignupForm } from "./signup-form"
 
 export const metadata: Metadata = {
-  title: "Create an Account",
+  title: { absolute: "Create a TFi Account | UK Flooring & Paneling Customers" },
+  description:
+    "Create your TFi Floors and Interiors account to save product selections, unlock trade pricing and track flooring, wall paneling and kitchen orders end-to-end.",
+  alternates: { canonical: "/signup" },
+  robots: { index: false, follow: false },
 }
 
 export default function SignupPage() {

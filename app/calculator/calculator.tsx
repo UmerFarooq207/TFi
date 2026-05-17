@@ -183,9 +183,9 @@ export function Calculator() {
           </div>
         </FadeUp>
         <h1 className="est-hero__title">
-          <Reveal><span>Get an estimate</span></Reveal>
+          <Reveal><span>Free Flooring &amp; Paneling</span></Reveal>
           <br />
-          <Reveal delay={0.08}><span>in seconds.</span></Reveal>
+          <Reveal delay={0.08}><span>Cost Estimate Calculator.</span></Reveal>
         </h1>
         <FadeUp delay={0.14}>
           <p className="est-hero__sub">
@@ -204,9 +204,9 @@ export function Calculator() {
             <div className="est-side__eyebrow">How it works</div>
           </FadeUp>
           <h2 className="est-side__title">
-            <Reveal><span>Three quick steps,</span></Reveal>
+            <Reveal><span>Three Simple Steps —</span></Reveal>
             <br />
-            <Reveal delay={0.06}><span>no callbacks.</span></Reveal>
+            <Reveal delay={0.06}><span>No Sales Calls Required.</span></Reveal>
           </h2>
 
           <StaggerGroup className="est-steps" stagger={0.08}>
@@ -255,7 +255,7 @@ export function Calculator() {
         <FadeUp y={40}>
           <div className="est-card">
             <div className="est-card__head">
-              <h2>Your estimate</h2>
+              <h2>Your Project Estimate</h2>
               <span className="est-card__hint">Live · updates as you type</span>
             </div>
 
@@ -421,7 +421,7 @@ export function Calculator() {
       {/* ============ FAQ ============ */}
       <section className="est-faq">
         <FadeUp>
-          <h2>Common questions about estimates.</h2>
+          <h2>Frequently Asked Questions About Our Estimates.</h2>
         </FadeUp>
         <StaggerGroup className="est-faq__grid" stagger={0.06}>
           {FAQS.map((f) => (

@@ -7,9 +7,29 @@ import { Reveal, FadeUp, StaggerGroup, StaggerItem } from "@/components/reveal"
 import { FeaturedProducts } from "@/components/featured-products"
 
 export const metadata = {
-  title: "TFi — Floors & Interiors",
+  title: { absolute: "Premium Flooring & Interiors Designed for British Homes | TFi UK" },
   description:
-    "Considered floors and panels for those who build with intent. Premium flooring, wall paneling, and surfaces.",
+    "TFi Floors and Interiors supplies premium engineered oak flooring, acoustic wall panels, microcement surfaces and bespoke kitchens — designed for British homes and delivered UK-wide from our Birmingham showroom. 15-year commercial warranty.",
+  keywords: [
+    "premium flooring UK",
+    "engineered oak flooring British homes",
+    "acoustic wall panels UK",
+    "microcement surfaces UK",
+    "bespoke kitchens British homes",
+    "flooring supplier Birmingham",
+    "TFi Floors and Interiors",
+    "wide plank oak floors UK",
+    "stair treads UK",
+    "FSC certified flooring",
+  ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Premium Flooring & Interiors Designed for British Homes | TFi UK",
+    description:
+      "Engineered oak, acoustic wall panels, microcement and bespoke kitchens for British homes — supplied UK-wide from Birmingham.",
+    url: "/",
+    type: "website",
+  },
 }
 
 const TESTIMONIALS = [
@@ -38,14 +58,15 @@ export default function HomePage() {
         </div>
         <div className="collection__intro">
           <h2>
-            <Reveal><span>Surfaces, considered.</span></Reveal>
+            <Reveal><span>Premium Surfaces,</span></Reveal>
             <br />
-            <Reveal delay={0.08}><span>Floor to ceiling.</span></Reveal>
+            <Reveal delay={0.08}><span>From Floor to Ceiling.</span></Reveal>
           </h2>
           <FadeUp delay={0.15}>
             <p>
-              Six collections built around the rooms they go into — grain, weight, and the kind of
-              detail you only notice when it&apos;s missing.
+              Six premium flooring and wall paneling collections built around the rooms they go
+              into — engineered oak, acoustic slat walls, microcement and stone surfaces,
+              specified for UK homes, studios and commercial fit-outs.
             </p>
           </FadeUp>
         </div>
@@ -54,7 +75,7 @@ export default function HomePage() {
           <StaggerItem className="bento-card bc-sm">
             <Link href="/products?category=flooring" className="bento-card__inner">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=1200&q=70" alt="Engineered oak floor" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=1200&q=70" alt="Premium engineered oak flooring — wide plank European oak from TFi Floors and Interiors UK" loading="lazy" />
               <div className="bc-body">
                 <div><div className="bc-eyebrow">Collection 01</div></div>
                 <div>
@@ -68,7 +89,7 @@ export default function HomePage() {
           <StaggerItem className="bento-card bc-lg">
             <Link href="/products?category=wall-paneling" className="bento-card__inner">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1618219740975-d40978bb7378?w=1600&q=70" alt="Slatted wall panels in walnut" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1618219740975-d40978bb7378?w=1600&q=70" alt="Acoustic slatted wall panels in walnut — sound-absorbing timber wall paneling UK" loading="lazy" />
               <div className="bc-body">
                 <div><div className="bc-eyebrow">Collection 02</div></div>
                 <div>
@@ -83,7 +104,7 @@ export default function HomePage() {
           <StaggerItem className="bento-card bc-half-l">
             <Link href="/products?category=kitchen" className="bento-card__inner">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1600&q=70" alt="Microcement bath surface" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1600&q=70" alt="Microcement bathroom surface — seamless waterproof microcement kitchens and baths UK" loading="lazy" />
               <div className="bc-body">
                 <div><div className="bc-eyebrow">Collection 03</div></div>
                 <div>
@@ -98,7 +119,7 @@ export default function HomePage() {
           <StaggerItem className="bento-card bc-half-r">
             <Link href="/products?category=stairs" className="bento-card__inner">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&q=70" alt="Solid timber stair treads" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&q=70" alt="Solid timber stair treads and risers cut to specification — bespoke staircase joinery UK" loading="lazy" />
               <div className="bc-body">
                 <div><div className="bc-eyebrow">Collection 04</div></div>
                 <div>
@@ -113,7 +134,7 @@ export default function HomePage() {
           <StaggerItem className="bento-card bc-full">
             <Link href="/products" className="bento-card__inner">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=2000&q=70" alt="Trade installation overview" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=2000&q=70" alt="Trade flooring and paneling installation for residential and commercial UK builds" loading="lazy" />
               <div className="bc-body">
                 <div><div className="bc-eyebrow">For trade</div></div>
                 <div>
@@ -138,9 +159,9 @@ export default function HomePage() {
             </span>
           </Reveal>
           <h2>
-            <Reveal><span>Specified, fitted,</span></Reveal>
+            <Reveal><span>Trusted by Architects,</span></Reveal>
             <br />
-            <Reveal delay={0.08}><span>still standing.</span></Reveal>
+            <Reveal delay={0.08}><span>Homeowners &amp; Trade.</span></Reveal>
           </h2>
         </div>
         <TestimonialsMarquee items={TESTIMONIALS} />
@@ -158,9 +179,9 @@ export default function HomePage() {
             </span>
           </Reveal>
           <h2>
-            <Reveal><span>Crafted with Detail.</span></Reveal>
+            <Reveal><span>Expert Craftsmanship.</span></Reveal>
             <br />
-            <Reveal delay={0.08}><span>Made to Last.</span></Reveal>
+            <Reveal delay={0.08}><span>Built to Last a Lifetime.</span></Reveal>
           </h2>
           <FadeUp delay={0.18}>
             <Link href="/calculator" className="tfi-pill">

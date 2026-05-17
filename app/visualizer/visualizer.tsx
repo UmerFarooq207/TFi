@@ -232,7 +232,7 @@ export function Visualizer() {
               <span className="diamond">◆</span>TFi Visualizer
             </span>
             <h1 className="viz-stage__title">
-              See it<br />in your space.
+              Preview Flooring<br />in Your Room.
             </h1>
           </header>
 

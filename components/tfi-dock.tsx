@@ -180,8 +180,8 @@ export function TfiDock() {
             </li>
           </ul>
           <div className="tfi-modal__contact">
-            <span className="lbl">Phone</span><span className="val">+92 300 123 4567</span>
-            <span className="lbl">Showroom</span><span className="val">hello@tfi.pk</span>
+            <span className="lbl">Phone</span><span className="val">+44 7790 000007</span>
+            <span className="lbl">Email</span><span className="val">info@tfifloorsandinteriors.co.uk</span>
           </div>
           <Link href="/contact" className="tfi-pill tfi-modal__cta" onClick={handleClose}>
             <span className="arrow">↳</span>Get a quote

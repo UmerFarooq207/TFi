@@ -18,23 +18,15 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## AI Room Visualizer (Python backend)
+## AI Room Visualizer (Runware)
 
-The `/visualizer` page can call the FastAPI service in `../Visualizer` to apply real material textures onto a user-uploaded room photo.
+The `/visualizer` page calls Runware's image inference API (FLUX.2 [klein] 9B Base by default) to replace the floor of an uploaded room photo with a chosen tile/plank material.
 
-1. **Start the Python service** (in a separate terminal):
+1. **Set `RUNWARE_API_KEY`** in `.env.local`. Get a key from <https://my.runware.ai/keys>. Optionally override `RUNWARE_VISUALIZER_MODEL` (defaults to `runware:400@3`, the FLUX.2 [klein] 9B Base AIR string).
 
-   ```bash
-   cd ../Visualizer
-   pip install -r requirements.txt
-   uvicorn app.main:app --reload --port 8000
-   ```
+2. On `/visualizer`, click **Upload your room photo**, pick a flooring swatch, then click **Visualize**. The route at `app/api/visualize/route.ts` sends the room + tile to Runware as reference images and stores the result.
 
-   The first run downloads the segmentation model (~500MB).
-
-2. **Set `VISUALIZER_API_URL`** in `.env.local` (defaults to `http://localhost:8000`).
-
-3. On the `/visualizer` page, click **Upload your room photo**, then pick any product swatch — the rendered AI preview replaces the CSS scene. The proxy lives at `app/api/visualize/route.ts` and forwards the request to `POST /api/v1/render` on the FastAPI service.
+3. Renders are cached on disk under `public/visualizer-cache/_<roomHash>_<flooringId>.png` (room hash = first 16 hex of SHA-256 of the uploaded bytes). Re-requesting the same combination serves from disk and skips Runware.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

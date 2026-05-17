@@ -43,3 +43,7 @@ next-env.d.ts
 # local AI/project notes
 SKILLS.md
 .claude/
+
+# visualizer render cache (regenerated on demand)
+/public/visualizer-cache/*
+!/public/visualizer-cache/.gitkeep

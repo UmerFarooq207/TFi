@@ -1,54 +1,284 @@
+import { randomUUID } from "node:crypto"
+import { mkdir, readFile, stat, writeFile } from "node:fs/promises"
+import path from "node:path"
 import { NextRequest } from "next/server"
+import { findRoom, VISUALIZER_ROOMS_DIR } from "@/lib/visualizer-rooms"
 
 export const runtime = "nodejs"
-export const dynamic = "force-dynamic"
 export const maxDuration = 120
 
-const VISUALIZER_API_URL =
-  process.env.VISUALIZER_API_URL ?? "http://localhost:8000"
+const RUNWARE_API_KEY = process.env.RUNWARE_API_KEY
+const RUNWARE_MODEL =
+  process.env.RUNWARE_VISUALIZER_MODEL ?? "runware:400@3"
+const RUNWARE_ENDPOINT = "https://api.runware.ai/v1"
 
-const ALLOWED_SURFACES = new Set(["floor", "wall", "ceiling"])
+const ROOMS_DIR = path.join(process.cwd(), "public", VISUALIZER_ROOMS_DIR)
+const CACHE_DIR = path.join(process.cwd(), "public", "visualizer-cache")
+const PUBLIC_CACHE_URL = "/visualizer-cache"
 
-async function urlToFile(url: string, fallbackName: string, origin: string): Promise<File> {
-  const absolute = url.startsWith("http") ? url : new URL(url, origin).toString()
+const FLOOR_PROMPT =
+  "I have added 2 images a room and tiles. replace the floor of ther room with new tiles. make sure to add the tiles in the best possible offset."
+
+function sanitizeId(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_-]/g, "-").slice(0, 64) || "unknown"
+}
+
+function mimeForFile(filename: string): string {
+  const ext = path.extname(filename).toLowerCase()
+  if (ext === ".jpg" || ext === ".jpeg") return "image/jpeg"
+  if (ext === ".webp") return "image/webp"
+  return "image/png"
+}
+
+function extForMime(mime: string): string {
+  if (mime.includes("jpeg") || mime.includes("jpg")) return "jpg"
+  if (mime.includes("webp")) return "webp"
+  return "png"
+}
+
+async function fileExists(p: string): Promise<boolean> {
+  try {
+    const s = await stat(p)
+    return s.isFile()
+  } catch {
+    return false
+  }
+}
+
+async function fetchTexture(
+  textureUrl: string,
+  origin: string
+): Promise<{ bytes: Buffer; mime: string }> {
+  const absolute = textureUrl.startsWith("http")
+    ? textureUrl
+    : new URL(textureUrl, origin).toString()
   const res = await fetch(absolute)
   if (!res.ok) {
     throw new Error(`Failed to fetch texture (${res.status} ${res.statusText})`)
   }
-  const blob = await res.blob()
-  const contentType = blob.type || "image/png"
-  const ext = contentType.split("/")[1]?.split(";")[0] ?? "png"
-  return new File([blob], `${fallbackName}.${ext}`, { type: contentType })
+  const buf = Buffer.from(await res.arrayBuffer())
+  const mime = res.headers.get("content-type")?.split(";")[0]?.trim() || "image/png"
+  return { bytes: buf, mime }
+}
+
+function detectImageSize(bytes: Buffer): { width: number; height: number } | null {
+  if (
+    bytes.length >= 24 &&
+    bytes[0] === 0x89 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x4e &&
+    bytes[3] === 0x47
+  ) {
+    return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) }
+  }
+  if (bytes.length >= 4 && bytes[0] === 0xff && bytes[1] === 0xd8) {
+    let i = 2
+    while (i < bytes.length - 8) {
+      if (bytes[i] !== 0xff) return null
+      const marker = bytes[i + 1]
+      if (marker === 0xd8 || marker === 0xd9) return null
+      if (
+        marker >= 0xc0 &&
+        marker <= 0xcf &&
+        marker !== 0xc4 &&
+        marker !== 0xc8 &&
+        marker !== 0xcc
+      ) {
+        return {
+          width: bytes.readUInt16BE(i + 7),
+          height: bytes.readUInt16BE(i + 5),
+        }
+      }
+      const segLen = bytes.readUInt16BE(i + 2)
+      i += 2 + segLen
+    }
+  }
+  return null
+}
+
+function fitDimensions(w: number, h: number): { width: number; height: number } {
+  const MIN = 256
+  const MAX = 1536
+  const STEP = 64
+  const ratio = w / h
+  let aw = w
+  let ah = h
+  if (Math.max(aw, ah) > MAX) {
+    if (aw >= ah) {
+      aw = MAX
+      ah = Math.round(MAX / ratio)
+    } else {
+      ah = MAX
+      aw = Math.round(MAX * ratio)
+    }
+  }
+  if (Math.min(aw, ah) < MIN) {
+    if (aw <= ah) {
+      aw = MIN
+      ah = Math.round(MIN / ratio)
+    } else {
+      ah = MIN
+      aw = Math.round(MIN * ratio)
+    }
+  }
+  const snap = (v: number) =>
+    Math.max(MIN, Math.min(MAX, Math.round(v / STEP) * STEP))
+  return { width: snap(aw), height: snap(ah) }
+}
+
+async function callRunware(
+  roomBytes: Buffer,
+  roomMime: string,
+  textureBytes: Buffer,
+  textureMime: string,
+  width: number,
+  height: number
+): Promise<{ bytes: Buffer; mime: string }> {
+  if (!RUNWARE_API_KEY) {
+    throw new Error("RUNWARE_API_KEY is not set on the server")
+  }
+
+  const roomDataUri = `data:${roomMime};base64,${roomBytes.toString("base64")}`
+  const textureDataUri = `data:${textureMime};base64,${textureBytes.toString("base64")}`
+
+  const taskUUID = randomUUID()
+  const payload = [
+    {
+      taskType: "imageInference",
+      taskUUID,
+      model: RUNWARE_MODEL,
+      positivePrompt: FLOOR_PROMPT,
+      width,
+      height,
+      steps: 32,
+      CFGScale: 3.5,
+      numberResults: 1,
+      outputType: "URL",
+      outputFormat: "PNG",
+      includeCost: false,
+      inputs: {
+        referenceImages: [roomDataUri, textureDataUri],
+      },
+    },
+  ]
+
+  const res = await fetch(RUNWARE_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${RUNWARE_API_KEY}`,
+    },
+    body: JSON.stringify(payload),
+  })
+
+  const json = await res.json().catch(() => null)
+  if (!res.ok) {
+    const detail =
+      json?.errors?.[0]?.message ??
+      json?.error ??
+      `Runware HTTP ${res.status} ${res.statusText}`
+    throw new Error(typeof detail === "string" ? detail : JSON.stringify(detail))
+  }
+
+  if (json?.errors?.length) {
+    const first = json.errors[0]
+    throw new Error(
+      typeof first?.message === "string" ? first.message : JSON.stringify(first)
+    )
+  }
+
+  const result = Array.isArray(json?.data)
+    ? json.data.find(
+        (d: { taskType?: string; imageURL?: string }) =>
+          d?.taskType === "imageInference" && typeof d?.imageURL === "string"
+      )
+    : null
+
+  const imageUrl: string | undefined = result?.imageURL
+  if (!imageUrl) {
+    throw new Error("Runware response did not include an image URL")
+  }
+
+  const imgRes = await fetch(imageUrl)
+  if (!imgRes.ok) {
+    throw new Error(
+      `Failed to download Runware image (${imgRes.status} ${imgRes.statusText})`
+    )
+  }
+  const buf = Buffer.from(await imgRes.arrayBuffer())
+  const mime =
+    imgRes.headers.get("content-type")?.split(";")[0]?.trim() || "image/png"
+  return { bytes: buf, mime }
 }
 
 export async function POST(request: NextRequest) {
-  let inbound: FormData
+  const started = Date.now()
+
+  let body: { room_id?: unknown; flooring_id?: unknown; texture_url?: unknown }
   try {
-    inbound = await request.formData()
+    body = await request.json()
   } catch {
-    return Response.json({ error: "Expected multipart/form-data body" }, { status: 400 })
+    return Response.json({ error: "Expected JSON body" }, { status: 400 })
   }
 
-  const roomImage = inbound.get("room_image")
-  if (!(roomImage instanceof File)) {
-    return Response.json({ error: "room_image (file) is required" }, { status: 400 })
+  if (typeof body.room_id !== "string" || body.room_id.length === 0) {
+    return Response.json({ error: "room_id (string) is required" }, { status: 400 })
+  }
+  const room = findRoom(body.room_id)
+  if (!room) {
+    return Response.json({ error: `Unknown room_id: ${body.room_id}` }, { status: 400 })
   }
 
-  const textureFile = inbound.get("texture_image")
-  const textureUrl = inbound.get("texture_url")
+  if (typeof body.flooring_id !== "string" || body.flooring_id.length === 0) {
+    return Response.json({ error: "flooring_id (string) is required" }, { status: 400 })
+  }
+  const flooringId = sanitizeId(body.flooring_id)
 
-  let textureToSend: File
+  if (typeof body.texture_url !== "string" || body.texture_url.length === 0) {
+    return Response.json({ error: "texture_url (string) is required" }, { status: 400 })
+  }
+  const textureUrl = body.texture_url
+
+  const cacheBase = `${room.id}_${flooringId}`
+
   try {
-    if (textureFile instanceof File) {
-      textureToSend = textureFile
-    } else if (typeof textureUrl === "string" && textureUrl.length > 0) {
-      textureToSend = await urlToFile(textureUrl, "texture", request.nextUrl.origin)
-    } else {
-      return Response.json(
-        { error: "texture_image (file) or texture_url (string) is required" },
-        { status: 400 }
-      )
+    await mkdir(CACHE_DIR, { recursive: true })
+  } catch (err) {
+    return Response.json(
+      { error: "Could not prepare cache directory", detail: String(err) },
+      { status: 500 }
+    )
+  }
+
+  for (const ext of ["png", "jpg", "webp"]) {
+    const hit = path.join(CACHE_DIR, `${cacheBase}.${ext}`)
+    if (await fileExists(hit)) {
+      return Response.json({
+        rendered_image_url: `${PUBLIC_CACHE_URL}/${cacheBase}.${ext}`,
+        cache_key: cacheBase,
+        cached: true,
+        processing_time_ms: Date.now() - started,
+      })
     }
+  }
+
+  const roomPath = path.join(ROOMS_DIR, room.file)
+  let roomBytes: Buffer
+  try {
+    roomBytes = await readFile(roomPath)
+  } catch {
+    return Response.json(
+      {
+        error: `Preset room image is missing on disk: public/${VISUALIZER_ROOMS_DIR}/${room.file}`,
+      },
+      { status: 500 }
+    )
+  }
+  const roomMime = mimeForFile(room.file)
+
+  let texture: { bytes: Buffer; mime: string }
+  try {
+    texture = await fetchTexture(textureUrl, request.nextUrl.origin)
   } catch (err) {
     return Response.json(
       { error: err instanceof Error ? err.message : "Failed to load texture" },
@@ -56,55 +286,45 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const targetSurface = String(inbound.get("target_surface") ?? "floor").toLowerCase()
-  if (!ALLOWED_SURFACES.has(targetSurface)) {
-    return Response.json(
-      { error: `Unsupported target_surface '${targetSurface}'` },
-      { status: 400 }
-    )
-  }
+  const detected = detectImageSize(roomBytes)
+  const { width, height } = fitDimensions(
+    detected?.width ?? 1024,
+    detected?.height ?? 1024
+  )
 
-  const outbound = new FormData()
-  outbound.set("room_image", roomImage, roomImage.name || "room.png")
-  outbound.set("texture_image", textureToSend, textureToSend.name || "texture.png")
-  outbound.set("target_surface", targetSurface)
-
-  const passThrough = [
-    "tile_scale",
-    "rotation_degrees",
-    "blend_strength",
-    "preserve_lighting",
-    "use_sam2_refine",
-    "fill_enclosed_holes",
-  ] as const
-
-  for (const key of passThrough) {
-    const value = inbound.get(key)
-    if (value !== null) outbound.set(key, String(value))
-  }
-
-  let upstream: Response
+  let rendered: { bytes: Buffer; mime: string }
   try {
-    upstream = await fetch(`${VISUALIZER_API_URL}/api/v1/render`, {
-      method: "POST",
-      body: outbound,
-    })
+    rendered = await callRunware(
+      roomBytes,
+      roomMime,
+      texture.bytes,
+      texture.mime,
+      width,
+      height
+    )
   } catch (err) {
     return Response.json(
-      {
-        error: "Visualizer service is unreachable. Make sure the Python backend is running.",
-        detail: err instanceof Error ? err.message : String(err),
-        backend: VISUALIZER_API_URL,
-      },
+      { error: err instanceof Error ? err.message : "Runware render failed" },
       { status: 502 }
     )
   }
 
-  const contentType = upstream.headers.get("content-type") ?? "application/json"
-  const body = await upstream.text()
+  const ext = extForMime(rendered.mime)
+  const outName = `${cacheBase}.${ext}`
+  const outPath = path.join(CACHE_DIR, outName)
+  try {
+    await writeFile(outPath, rendered.bytes)
+  } catch (err) {
+    return Response.json(
+      { error: "Could not write cache file", detail: String(err) },
+      { status: 500 }
+    )
+  }
 
-  return new Response(body, {
-    status: upstream.status,
-    headers: { "content-type": contentType },
+  return Response.json({
+    rendered_image_url: `${PUBLIC_CACHE_URL}/${outName}`,
+    cache_key: cacheBase,
+    cached: false,
+    processing_time_ms: Date.now() - started,
   })
 }

@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto"
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { NextRequest } from "next/server"
-import { findRoom, VISUALIZER_ROOMS_DIR } from "@/lib/visualizer-rooms"
+import { findRoom, VISUALIZER_ROOMS_DIR, type VisualizerRoom } from "@/lib/visualizer-rooms"
 
 export const runtime = "nodejs"
 export const maxDuration = 120
@@ -47,12 +47,13 @@ async function fileExists(p: string): Promise<boolean> {
 
 async function fetchTexture(
   textureUrl: string,
-  origin: string
+  origin: string,
+  signal?: AbortSignal
 ): Promise<{ bytes: Buffer; mime: string }> {
   const absolute = textureUrl.startsWith("http")
     ? textureUrl
     : new URL(textureUrl, origin).toString()
-  const res = await fetch(absolute)
+  const res = await fetch(absolute, { signal })
   if (!res.ok) {
     throw new Error(`Failed to fetch texture (${res.status} ${res.statusText})`)
   }
@@ -132,7 +133,8 @@ async function callRunware(
   textureBytes: Buffer,
   textureMime: string,
   width: number,
-  height: number
+  height: number,
+  signal?: AbortSignal
 ): Promise<{ bytes: Buffer; mime: string }> {
   if (!RUNWARE_API_KEY) {
     throw new Error("RUNWARE_API_KEY is not set on the server")
@@ -169,6 +171,7 @@ async function callRunware(
       Authorization: `Bearer ${RUNWARE_API_KEY}`,
     },
     body: JSON.stringify(payload),
+    signal,
   })
 
   const json = await res.json().catch(() => null)
@@ -199,7 +202,7 @@ async function callRunware(
     throw new Error("Runware response did not include an image URL")
   }
 
-  const imgRes = await fetch(imageUrl)
+  const imgRes = await fetch(imageUrl, { signal })
   if (!imgRes.ok) {
     throw new Error(
       `Failed to download Runware image (${imgRes.status} ${imgRes.statusText})`
@@ -209,6 +212,50 @@ async function callRunware(
   const mime =
     imgRes.headers.get("content-type")?.split(";")[0]?.trim() || "image/png"
   return { bytes: buf, mime }
+}
+
+// Coalesce concurrent renders for the same (room, flooring) key so racing
+// requests don't each pay Runware for an identical image.
+type RenderJob = {
+  promise: Promise<{ outName: string }>
+  abort: AbortController
+  refs: number
+}
+const inFlight = new Map<string, RenderJob>()
+
+async function renderAndCache(
+  room: VisualizerRoom,
+  cacheBase: string,
+  textureUrl: string,
+  origin: string,
+  signal: AbortSignal
+): Promise<{ outName: string }> {
+  const roomPath = path.join(ROOMS_DIR, room.file)
+  const roomBytes = await readFile(roomPath)
+  const roomMime = mimeForFile(room.file)
+
+  const texture = await fetchTexture(textureUrl, origin, signal)
+
+  const detected = detectImageSize(roomBytes)
+  const { width, height } = fitDimensions(
+    detected?.width ?? 1024,
+    detected?.height ?? 1024
+  )
+
+  const rendered = await callRunware(
+    roomBytes,
+    roomMime,
+    texture.bytes,
+    texture.mime,
+    width,
+    height,
+    signal
+  )
+
+  const ext = extForMime(rendered.mime)
+  const outName = `${cacheBase}.${ext}`
+  await writeFile(path.join(CACHE_DIR, outName), rendered.bytes)
+  return { outName }
 }
 
 export async function POST(request: NextRequest) {
@@ -269,69 +316,53 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const roomPath = path.join(ROOMS_DIR, room.file)
-  let roomBytes: Buffer
-  try {
-    roomBytes = await readFile(roomPath)
-  } catch {
-    return Response.json(
-      {
-        error: `Preset room image is missing on disk: public/${VISUALIZER_ROOMS_DIR}/${room.file}`,
-      },
-      { status: 500 }
+  // Join an existing in-flight render for the same key, or start a new one.
+  let job = inFlight.get(cacheBase)
+  if (!job) {
+    const abort = new AbortController()
+    const promise = renderAndCache(
+      room,
+      cacheBase,
+      textureUrl,
+      request.nextUrl.origin,
+      abort.signal
     )
+    promise.finally(() => {
+      if (inFlight.get(cacheBase)?.promise === promise) {
+        inFlight.delete(cacheBase)
+      }
+    })
+    job = { promise, abort, refs: 0 }
+    inFlight.set(cacheBase, job)
   }
-  const roomMime = mimeForFile(room.file)
+  job.refs++
 
-  let texture: { bytes: Buffer; mime: string }
-  try {
-    texture = await fetchTexture(textureUrl, request.nextUrl.origin)
-  } catch (err) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : "Failed to load texture" },
-      { status: 400 }
-    )
+  // If the client disconnects, only abort the underlying work once every
+  // joined caller is gone — otherwise we'd cancel work other callers still want.
+  const onClientAbort = () => {
+    if (!job) return
+    job.refs--
+    if (job.refs <= 0) job.abort.abort()
   }
+  request.signal.addEventListener("abort", onClientAbort, { once: true })
 
-  const detected = detectImageSize(roomBytes)
-  const { width, height } = fitDimensions(
-    detected?.width ?? 1024,
-    detected?.height ?? 1024
-  )
-
-  let rendered: { bytes: Buffer; mime: string }
   try {
-    rendered = await callRunware(
-      roomBytes,
-      roomMime,
-      texture.bytes,
-      texture.mime,
-      width,
-      height
-    )
+    const { outName } = await job.promise
+    return Response.json({
+      rendered_image_url: `${PUBLIC_CACHE_URL}/${outName}`,
+      cache_key: cacheBase,
+      cached: false,
+      processing_time_ms: Date.now() - started,
+    })
   } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      return Response.json({ error: "Render cancelled" }, { status: 499 })
+    }
     return Response.json(
-      { error: err instanceof Error ? err.message : "Runware render failed" },
+      { error: err instanceof Error ? err.message : "Render failed" },
       { status: 502 }
     )
+  } finally {
+    request.signal.removeEventListener("abort", onClientAbort)
   }
-
-  const ext = extForMime(rendered.mime)
-  const outName = `${cacheBase}.${ext}`
-  const outPath = path.join(CACHE_DIR, outName)
-  try {
-    await writeFile(outPath, rendered.bytes)
-  } catch (err) {
-    return Response.json(
-      { error: "Could not write cache file", detail: String(err) },
-      { status: 500 }
-    )
-  }
-
-  return Response.json({
-    rendered_image_url: `${PUBLIC_CACHE_URL}/${outName}`,
-    cache_key: cacheBase,
-    cached: false,
-    processing_time_ms: Date.now() - started,
-  })
 }

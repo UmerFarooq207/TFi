@@ -72,6 +72,7 @@ export function Visualizer() {
   const [renderMs, setRenderMs] = useState<number | null>(null)
   const renderRequestId = useRef(0)
   const renderAbortRef = useRef<AbortController | null>(null)
+  const renderInFlightRef = useRef(false)
 
   const roomPreviewUrl = publicRoomUrl(room)
   const currentKey = floor?.textureUrl ? `${room.id}:${floor.id}` : null
@@ -90,6 +91,10 @@ export function Visualizer() {
 
   const runRender = useCallback(async () => {
     if (!floor?.textureUrl) return
+    // Synchronous re-entry guard: button's `disabled` only takes effect on the
+    // next render, so a fast double-click can otherwise post twice.
+    if (renderInFlightRef.current) return
+    renderInFlightRef.current = true
     renderAbortRef.current?.abort()
     const controller = new AbortController()
     renderAbortRef.current = controller
@@ -134,6 +139,7 @@ export function Visualizer() {
       setRenderError(API_ERROR_MESSAGE)
     } finally {
       if (id === renderRequestId.current) setRenderLoading(false)
+      renderInFlightRef.current = false
     }
   }, [room, floor])
 

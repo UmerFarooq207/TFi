@@ -20,7 +20,7 @@ export const metadata = {
     "TFi Floors and Interiors",
     "wide plank oak floors UK",
     "stair treads UK",
-    "FSC certified flooring",
+    "nationwide UK flooring delivery",
   ],
   alternates: { canonical: "/" },
   openGraph: {
@@ -195,8 +195,8 @@ export default function HomePage() {
       <StaggerGroup className="stats" stagger={0.08}>
         <StaggerItem><div><div className="num">120+</div><div className="lbl">Finishes across floors, panels, surfaces</div></div></StaggerItem>
         <StaggerItem><div><div className="num">15 yr</div><div className="lbl">Warranty on commercial installations</div></div></StaggerItem>
-        <StaggerItem><div><div className="num">FSC</div><div className="lbl">All timber sourced from certified forests</div></div></StaggerItem>
-        <StaggerItem><div><div className="num">UK</div><div className="lbl">Birmingham showroom + UK-wide trade</div></div></StaggerItem>
+        <StaggerItem><div><div className="num">UK</div><div className="lbl">Birmingham showroom</div></div></StaggerItem>
+        <StaggerItem><div><div className="num">Nationwide</div><div className="lbl">Delivery to addresses across the United Kingdom</div></div></StaggerItem>
       </StaggerGroup>
 
       <HomeExtras />

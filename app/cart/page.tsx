@@ -399,7 +399,7 @@ export default function CartFlowPage() {
                   <ul className="cart-summary__perks">
                     <li><span className="perk-mark" aria-hidden>◆</span>Free trade fittings consult</li>
                     <li><span className="perk-mark" aria-hidden>◆</span>15-year commercial warranty</li>
-                    <li><span className="perk-mark" aria-hidden>◆</span>UK-wide delivery, FSC certified</li>
+                    <li><span className="perk-mark" aria-hidden>◆</span>Nationwide UK delivery</li>
                   </ul>
 
                   <p className="cart-summary__note">

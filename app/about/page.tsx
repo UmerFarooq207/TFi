@@ -31,9 +31,9 @@ export const metadata: Metadata = {
 
 const values = [
   {
-    label: "Material Integrity",
+    label: "Curated Catalogue",
     description:
-      "Every product we specify is vetted for durability, finish quality, and sourcing ethics. No shortcuts.",
+      "We only stock brands we've personally vetted for durability and finish quality. No filler ranges, no shortcuts.",
   },
   {
     label: "Precision Install",
@@ -132,9 +132,9 @@ export default function AboutPage() {
                 <p>
                   TFi Floors and Interiors was founded in 2010 with a simple belief: that the
                   materials underfoot and around you shape how you feel in a space. Our founder,
-                  after years sourcing premium flooring, hardwood surfaces and stone across
-                  Europe and South Asia, saw a gap in the UK market for genuinely high-grade,
-                  well-installed interior materials.
+                  after years working with premium flooring brands across Europe and South Asia,
+                  saw a gap in the UK market for a retailer that stocked genuinely high-grade
+                  interior materials and stood behind every installation.
                 </p>
                 <p>
                   From a single Birmingham showroom, we have grown into one of the UK&apos;s

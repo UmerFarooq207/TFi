@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     "premium interior materials",
     "Birmingham flooring showroom",
     "trade flooring supplier UK",
-    "FSC certified timber",
+    "nationwide UK flooring delivery",
     "interior design materials",
     "wide plank oak",
     "stair treads and risers",

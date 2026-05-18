@@ -238,8 +238,8 @@ export function Calculator() {
             </StaggerItem>
             <StaggerItem>
               <div>
-                <div className="est-trust__num">FSC</div>
-                <div className="est-trust__lbl">Certified timber sources</div>
+                <div className="est-trust__num">Nationwide</div>
+                <div className="est-trust__lbl">Delivery across the United Kingdom</div>
               </div>
             </StaggerItem>
             <StaggerItem>

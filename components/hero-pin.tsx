@@ -106,7 +106,7 @@ export function HeroPin() {
         <motion.div className="hero-pin__panel" style={{ opacity: panelOpacity, y: panelY }}>
           <div className="hero-pin__panel-row">
             <span className="t-eyebrow hero-pin__eyebrow">
-              <span className="diamond">◆</span>Floors &amp; Interiors
+              Floors &amp; Interiors
             </span>
             <span className="hero-pin__divider" aria-hidden />
             <p className="hero-pin__copy">

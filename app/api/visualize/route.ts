@@ -14,7 +14,10 @@ const RUNWARE_ENDPOINT = "https://api.runware.ai/v1"
 
 const ROOMS_DIR = path.join(process.cwd(), "public", VISUALIZER_ROOMS_DIR)
 const CACHE_DIR = path.join(process.cwd(), "public", "visualizer-cache")
-const PUBLIC_CACHE_URL = "/visualizer-cache"
+// Serve cached renders through the dynamic Route Handler at
+// /api/visualizer-cache/<file> so newly written files are picked up
+// at request time — no `systemctl restart` required.
+const PUBLIC_CACHE_URL = "/api/visualizer-cache"
 
 const FLOOR_PROMPT =
   "I have added 2 images a room and tiles. replace the floor of ther room with new tiles. make sure to add the tiles in the best possible offset."

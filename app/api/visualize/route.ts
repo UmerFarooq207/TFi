@@ -304,7 +304,8 @@ export async function POST(request: NextRequest) {
     const hit = path.join(CACHE_DIR, `${cacheBase}.${ext}`)
     if (await fileExists(hit)) {
       // Simulate render time so the cache is not visible to the user.
-      const delayMs = 10_000 + Math.floor(Math.random() * 5_001)
+      // Kept under 10s so the user perceives the visualizer as snappy.
+      const delayMs = 5_000 + Math.floor(Math.random() * 3_001)
       const elapsed = Date.now() - started
       const remaining = Math.max(0, delayMs - elapsed)
       if (remaining > 0) {

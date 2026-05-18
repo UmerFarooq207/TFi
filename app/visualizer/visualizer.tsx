@@ -66,6 +66,7 @@ export function Visualizer() {
   const [railOpen, setRailOpen] = useState(true)
 
   const [renderedUrl, setRenderedUrl] = useState<string | null>(null)
+  const [revealedUrl, setRevealedUrl] = useState<string | null>(null)
   const [renderedKey, setRenderedKey] = useState<string | null>(null)
   const [renderLoading, setRenderLoading] = useState(false)
   const [renderError, setRenderError] = useState<string | null>(null)
@@ -73,6 +74,39 @@ export function Visualizer() {
   const renderRequestId = useRef(0)
   const renderAbortRef = useRef<AbortController | null>(null)
   const renderInFlightRef = useRef(false)
+
+  // Auto-dismiss the API error toast after 4s — never leave it stuck
+  // on screen.
+  useEffect(() => {
+    if (!renderError) return
+    const t = setTimeout(() => setRenderError(null), 4000)
+    return () => clearTimeout(t)
+  }, [renderError])
+
+  // Preload the new rendered image; only reveal it once the browser has
+  // it decoded. This eliminates the ~1s gap where the old room photo
+  // shows briefly before the new render pops in.
+  useEffect(() => {
+    if (!renderedUrl) {
+      setRevealedUrl(null)
+      return
+    }
+    if (renderedUrl === revealedUrl) return
+    const img = new window.Image()
+    let cancelled = false
+    img.onload = () => {
+      if (!cancelled) setRevealedUrl(renderedUrl)
+    }
+    img.onerror = () => {
+      // Even on a decode hiccup, still surface the URL so the <img>
+      // tag below can try natively and show its own error state.
+      if (!cancelled) setRevealedUrl(renderedUrl)
+    }
+    img.src = renderedUrl
+    return () => {
+      cancelled = true
+    }
+  }, [renderedUrl, revealedUrl])
 
   const roomPreviewUrl = publicRoomUrl(room)
   const currentKey = floor?.textureUrl ? `${room.id}:${floor.id}` : null
@@ -83,6 +117,7 @@ export function Visualizer() {
     renderAbortRef.current?.abort()
     renderRequestId.current++
     setRenderedUrl(null)
+    setRevealedUrl(null)
     setRenderedKey(null)
     setRenderError(null)
     setRenderMs(null)
@@ -221,14 +256,16 @@ export function Visualizer() {
           <div className="viz-stage__photo" aria-hidden>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={renderedUrl ?? roomPreviewUrl}
+              key={revealedUrl ?? roomPreviewUrl}
+              src={revealedUrl ?? roomPreviewUrl}
               alt={
-                renderedUrl
+                revealedUrl
                   ? `AI-rendered preview of ${room.name}`
                   : `${room.name} preview`
               }
+              className="viz-stage__photo-img"
             />
-            {renderLoading && (
+            {(renderLoading || (renderedUrl !== null && revealedUrl !== renderedUrl)) && (
               <div className="viz-stage__loading" role="status" aria-live="polite">
                 <span className="viz-stage__spinner" aria-hidden />
                 <span>Generating AI preview…</span>

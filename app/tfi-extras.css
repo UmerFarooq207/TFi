@@ -102,6 +102,20 @@
   transform: translate3d(var(--viz-rail-w), -50%, 0);
 }
 
+/* Cross-fade the stage image whenever its URL changes — feels like the
+   room is being "updated" in place rather than a brand-new image
+   loading from scratch. */
+.viz-stage__photo-img {
+  animation: viz-photo-fade 0.55s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes viz-photo-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .viz-stage__photo-img { animation: none; }
+}
+
 /* AI photo stage */
 .viz-stage__photo {
   position: absolute;

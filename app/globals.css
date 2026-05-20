@@ -2283,6 +2283,7 @@ html.tfi-theme body {
 .col-filter-backdrop { display: none; }
 
 @keyframes colFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes colDrawerIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
 /* =========================================================
    Site-wide mobile fixes (≤900px and ≤640px tuning)
@@ -2307,16 +2308,18 @@ html.tfi-theme body {
     animation: colFadeIn 240ms var(--tfi-ease);
   }
   .col-filter-panel {
+    display: none;
     position: fixed; top: 0; right: 0; z-index: 90;
     width: min(86vw, 360px); height: 100%;
     background: var(--tfi-cream);
     box-shadow: -8px 0 40px rgba(0, 0, 0, 0.18);
-    transform: translateX(100%);
-    transition: transform 320ms var(--tfi-ease);
-    display: flex; flex-direction: column;
+    flex-direction: column;
     overflow-y: auto;
   }
-  .col-filter-panel.is-open { transform: translateX(0); }
+  .col-filter-panel.is-open {
+    display: flex;
+    animation: colDrawerIn 320ms var(--tfi-ease);
+  }
   .col-filter-panel__head {
     display: flex; align-items: center; justify-content: space-between;
     padding: 22px var(--tfi-px);

@@ -1,12 +1,13 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from "react"
 import Link from "next/link"
 import {
   ArrowLeft,
   ChevronsLeft,
   ChevronsRight,
   Info,
+  Move,
   RotateCcw,
   Search,
   Star,
@@ -243,6 +244,38 @@ export function Visualizer() {
     runRender()
   }, [runRender])
 
+  // ── Drag-to-pan the room image so small screens can explore the whole room.
+  // Pans via object-position (0–100%), which reveals the parts cropped by
+  // object-fit: cover without needing the image's intrinsic size.
+  const photoRef = useRef<HTMLDivElement | null>(null)
+  const panDrag = useRef({ active: false, x: 0, y: 0 })
+  const [pan, setPan] = useState({ x: 50, y: 50 })
+  const [hasPanned, setHasPanned] = useState(false)
+
+  const onPanStart = (e: RPointerEvent<HTMLDivElement>) => {
+    panDrag.current = { active: true, x: e.clientX, y: e.clientY }
+    photoRef.current?.setPointerCapture(e.pointerId)
+  }
+  const onPanMove = (e: RPointerEvent<HTMLDivElement>) => {
+    const d = panDrag.current
+    const el = photoRef.current
+    if (!d.active || !el) return
+    const rect = el.getBoundingClientRect()
+    const dx = ((e.clientX - d.x) / rect.width) * 100
+    const dy = ((e.clientY - d.y) / rect.height) * 100
+    d.x = e.clientX
+    d.y = e.clientY
+    if (!hasPanned) setHasPanned(true)
+    setPan((p) => ({
+      x: Math.min(100, Math.max(0, p.x - dx)),
+      y: Math.min(100, Math.max(0, p.y - dy)),
+    }))
+  }
+  const onPanEnd = (e: RPointerEvent<HTMLDivElement>) => {
+    panDrag.current.active = false
+    photoRef.current?.releasePointerCapture?.(e.pointerId)
+  }
+
   return (
     <div className={`viz-shell${railOpen ? "" : " viz-shell--collapsed"}`}>
       <Link href="/" className="viz-back" aria-label="Back to home">
@@ -253,7 +286,15 @@ export function Visualizer() {
       {/* ============ STAGE ============ */}
       <section className="viz-stage">
         <div className="viz-stage__canvas">
-          <div className="viz-stage__photo" aria-hidden>
+          <div
+            ref={photoRef}
+            className="viz-stage__photo"
+            aria-hidden
+            onPointerDown={onPanStart}
+            onPointerMove={onPanMove}
+            onPointerUp={onPanEnd}
+            onPointerCancel={onPanEnd}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               key={revealedUrl ?? roomPreviewUrl}
@@ -264,6 +305,8 @@ export function Visualizer() {
                   : `${room.name} preview`
               }
               className="viz-stage__photo-img"
+              draggable={false}
+              style={{ objectPosition: `${pan.x}% ${pan.y}%` }}
             />
             {(renderLoading || (renderedUrl !== null && revealedUrl !== renderedUrl)) && (
               <div className="viz-stage__loading" role="status" aria-live="polite">
@@ -274,6 +317,12 @@ export function Visualizer() {
             {renderError && !renderLoading && (
               <div className="viz-stage__alert" role="alert">
                 {renderError}
+              </div>
+            )}
+            {!hasPanned && (
+              <div className="viz-stage__panhint">
+                <Move size={13} strokeWidth={1.8} />
+                <span>Drag to look around</span>
               </div>
             )}
           </div>

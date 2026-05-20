@@ -88,9 +88,7 @@ export function CollectionCarousel({ products, currentSlug, title = "You may als
                 </div>
                 <div className="cc__body">
                   <p className="cc__name">{p.name}</p>
-                  {secondary === "color" ? (
-                    p.color && <p className="cc__price cc__color">{p.color}</p>
-                  ) : (
+                  {secondary === "color" ? null : (
                     <p className="cc__price">
                       {fmtPrice(p.price)}
                       {p.unit && <span className="cc__unit"> / {p.unit}</span>}

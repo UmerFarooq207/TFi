@@ -171,12 +171,13 @@ export function ProductForm({ product }: ProductFormProps) {
     )
     if (!source) return
     prefilledForRef.current = key
+    if (source.pattern) setValue("pattern", source.pattern)
     if (source.dimensions) setValue("dimensions", source.dimensions)
     if (source.package) setValue("package", source.package)
     if (source.pallet) setValue("pallet", source.pallet)
     replaceSpecs(source.specs ?? [])
     toast.info(
-      `Prefilled dimensions, package, pallet & specs from the "${source.collection}" collection — edit as needed.`
+      `Prefilled pattern, dimensions, package, pallet & specs from the "${source.collection}" collection — edit as needed.`
     )
   }, [collectionValue, allProducts, product?.slug, setValue, replaceSpecs])
 
@@ -312,7 +313,7 @@ export function ProductForm({ product }: ProductFormProps) {
             </datalist>
             {errors.collection && <p className="text-xs text-destructive">{errors.collection.message}</p>}
             <p className="text-[10px] text-muted-foreground/50 mt-1">
-              Pick an existing collection to auto-fill dimensions, package, pallet &amp; specs.
+              Pick an existing collection to auto-fill pattern, dimensions, package, pallet &amp; specs.
             </p>
           </div>
         </div>

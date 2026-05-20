@@ -61,8 +61,8 @@
 .viz-stage__title {
   font-family: var(--font-inter-tight), var(--font-inter), Arial, sans-serif;
   font-weight: 500;
-  font-size: clamp(36px, 4.2vw, 64px);
-  line-height: 1.02;
+  font-size: clamp(28px, 3.2vw, 44px);
+  line-height: 1.04;
   letter-spacing: -0.025em;
   color: #fff;
   margin: 0;
@@ -1650,7 +1650,7 @@
 .col-hero {
   background: var(--tfi-cream);
   color: var(--tfi-ink);
-  padding: 120px var(--tfi-px) 36px;
+  padding: 96px var(--tfi-px) 32px;
   border-bottom: 1px solid var(--tfi-line);
 }
 .col-hero__crumbs {
@@ -1668,15 +1668,15 @@
 .col-hero__title {
   font-family: var(--font-inter-tight), var(--font-inter), Arial, sans-serif;
   font-weight: 500;
-  font-size: clamp(40px, 5vw, 72px);
-  line-height: 1.02;
+  font-size: clamp(32px, 4vw, 54px);
+  line-height: 1.04;
   letter-spacing: -0.025em;
   color: var(--tfi-ink);
   margin: 0 0 18px;
   max-width: 22ch;
 }
 .col-hero__sub {
-  font-size: clamp(15px, 1.05vw, 17px);
+  font-size: clamp(13.5px, 0.95vw, 15px);
   line-height: 1.55;
   color: var(--tfi-ink);
   opacity: 0.72;
@@ -1772,7 +1772,7 @@
 }
 .col-grid-v2 {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 24px 18px;
 }
 @media (max-width: 1100px) {
@@ -1784,10 +1784,21 @@
   text-decoration: none;
   color: inherit;
 }
+.col-card-v2__link {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+}
+.col-card-v2__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
 .col-card-v2__media {
   position: relative;
   width: 100%;
-  aspect-ratio: 4/5;
+  aspect-ratio: 1/1;
   background: var(--tfi-cream-2);
   overflow: hidden;
   border-radius: 2px;
@@ -1851,7 +1862,7 @@
 }
 .col-card-v2__name {
   font-family: var(--font-inter-tight), var(--font-inter), Arial, sans-serif;
-  font-size: 14.5px;
+  font-size: 13.5px;
   font-weight: 500;
   line-height: 1.25;
   letter-spacing: -0.012em;
@@ -1859,7 +1870,7 @@
 }
 .col-card-v2__price {
   font-family: var(--font-inter-tight), var(--font-inter), Arial, sans-serif;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: -0.005em;
   color: var(--tfi-ink);
@@ -1903,7 +1914,7 @@
 .col-cta h2 {
   font-family: var(--font-inter-tight), var(--font-inter), Arial, sans-serif;
   font-weight: 500;
-  font-size: clamp(30px, 3.6vw, 48px);
+  font-size: clamp(26px, 3vw, 40px);
   line-height: 1.1;
   letter-spacing: -0.022em;
   color: var(--tfi-cream);

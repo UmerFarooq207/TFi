@@ -5,6 +5,10 @@ import { ShowroomScroll } from "@/components/showroom-scroll"
 import { HeroPin } from "@/components/hero-pin"
 import { Reveal, FadeUp, StaggerGroup, StaggerItem } from "@/components/reveal"
 import { FeaturedProducts } from "@/components/featured-products"
+import { CategoryShowcase } from "@/components/category-showcase"
+
+// Render on each request so category tags reflect the live product catalogue.
+export const dynamic = "force-dynamic"
 
 export const metadata = {
   title: { absolute: "Premium Flooring & Interiors Designed for British Homes | TFi UK" },
@@ -41,114 +45,82 @@ const TESTIMONIALS = [
   { name: "Dominic Reyes",     role: "Developer, Reyes & Co.",        initials: "DR", rating: 5, text: "We did a 14-flat refurb on stair treads alone. Cut to spec, on time, and warranty paperwork was the easiest part of the job." },
 ]
 
+const BRANDS = [
+  { name: "AGT",      logo: "/assets/AGT-logo.png" },
+  { name: "Finfloor", logo: "/assets/Finfloor-logo.webp" },
+  { name: "Finsa",    logo: "/assets/Finsa-logo.png" },
+]
+
 export default function HomePage() {
   return (
     <>
       {/* ============ HERO — pinned two-stage reveal ============ */}
       <HeroPin />
 
-      {/* ============ PRODUCT COLLECTION (bento) ============ */}
-      <section className="collection" data-screen-label="02 Collection">
+      {/* ============ PRODUCT CATEGORIES (bento) ============ */}
+      <CategoryShowcase />
+
+      {/* ============ BRANDS ============ */}
+      <section className="brands" data-screen-label="03 Brands">
         <div className="tfi-section-eyebrow">
           <Reveal>
             <span className="t-eyebrow">
-              <span className="diamond">◆</span>Product Collection
+              <span className="diamond">◆</span>Our Brands
             </span>
           </Reveal>
         </div>
-        <div className="collection__intro">
+        <div className="brands__intro">
           <h2>
-            <Reveal><span>Premium Surfaces,</span></Reveal>
-            <br />
-            <Reveal delay={0.08}><span>From Floor to Ceiling.</span></Reveal>
+            <Reveal><span>Shop by Brand.</span></Reveal>
           </h2>
-          <FadeUp delay={0.15}>
+          <FadeUp delay={0.12}>
             <p>
-              Six premium flooring and wall paneling collections built around the rooms they go
-              into — engineered oak, acoustic slat walls, microcement and stone surfaces,
-              specified for UK homes, studios and commercial fit-outs.
+              Browse curated ranges from leading European manufacturers — tap a brand to
+              see its full collection.
             </p>
           </FadeUp>
         </div>
-
-        <StaggerGroup className="bento" stagger={0.09}>
-          <StaggerItem className="bento-card bc-sm">
-            <Link href="/products?category=flooring" className="bento-card__inner">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=1200&q=70" alt="Premium engineered oak flooring — wide plank European oak from TFi Floors and Interiors UK" loading="lazy" />
-              <div className="bc-body">
-                <div><div className="bc-eyebrow">Collection 01</div></div>
-                <div>
-                  <div className="bc-title">Engineered Oak</div>
-                  <span className="bc-pill"><span className="arrow">↳</span>View floors</span>
-                </div>
-              </div>
-            </Link>
-          </StaggerItem>
-
-          <StaggerItem className="bento-card bc-lg">
-            <Link href="/products?category=wall-paneling" className="bento-card__inner">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1618219740975-d40978bb7378?w=1600&q=70" alt="Acoustic slatted wall panels in walnut — sound-absorbing timber wall paneling UK" loading="lazy" />
-              <div className="bc-body">
-                <div><div className="bc-eyebrow">Collection 02</div></div>
-                <div>
-                  <div className="bc-title">Acoustic Wall Panels</div>
-                  <p className="bc-meta">Solid timber slats over felt — quiet rooms, soft echoes, no compromises.</p>
-                  <span className="bc-pill" style={{ marginTop: 14 }}><span className="arrow">↳</span>View panels</span>
-                </div>
-              </div>
-            </Link>
-          </StaggerItem>
-
-          <StaggerItem className="bento-card bc-half-l">
-            <Link href="/products?category=kitchen" className="bento-card__inner">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1600&q=70" alt="Microcement bathroom surface — seamless waterproof microcement kitchens and baths UK" loading="lazy" />
-              <div className="bc-body">
-                <div><div className="bc-eyebrow">Collection 03</div></div>
-                <div>
-                  <div className="bc-title">Microcement &amp; Stone</div>
-                  <p className="bc-meta">Seamless surfaces for kitchens, baths, and rooms that don&apos;t forgive shortcuts.</p>
-                  <span className="bc-pill" style={{ marginTop: 14 }}><span className="arrow">↳</span>View surfaces</span>
-                </div>
-              </div>
-            </Link>
-          </StaggerItem>
-
-          <StaggerItem className="bento-card bc-half-r">
-            <Link href="/products?category=stairs" className="bento-card__inner">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&q=70" alt="Solid timber stair treads and risers cut to specification — bespoke staircase joinery UK" loading="lazy" />
-              <div className="bc-body">
-                <div><div className="bc-eyebrow">Collection 04</div></div>
-                <div>
-                  <div className="bc-title">Stair &amp; Tread</div>
-                  <p className="bc-meta">Solid stair treads, risers, and nosings cut to your build.</p>
-                  <span className="bc-pill" style={{ marginTop: 14 }}><span className="arrow">↳</span>View stairs</span>
-                </div>
-              </div>
-            </Link>
-          </StaggerItem>
-
-          <StaggerItem className="bento-card bc-full">
-            <Link href="/products" className="bento-card__inner">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=2000&q=70" alt="Trade flooring and paneling installation for residential and commercial UK builds" loading="lazy" />
-              <div className="bc-body">
-                <div><div className="bc-eyebrow">For trade</div></div>
-                <div>
-                  <div className="bc-title">Specifying for residential &amp; commercial builds</div>
-                  <span className="bc-pill" style={{ marginTop: 14 }}><span className="arrow">↳</span>Trade portal</span>
-                </div>
-              </div>
-            </Link>
-          </StaggerItem>
+        <StaggerGroup className="brand-grid" stagger={0.08}>
+          {BRANDS.map((b) => (
+            <StaggerItem key={b.name}>
+              <Link href={`/products?brand=${encodeURIComponent(b.name)}`} className="brand-card">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={b.logo} alt={`${b.name} flooring — shop ${b.name} products`} className="brand-card__logo" loading="lazy" />
+                <span className="brand-card__cta"><span className="arrow">↳</span>Shop {b.name}</span>
+              </Link>
+            </StaggerItem>
+          ))}
         </StaggerGroup>
       </section>
 
       {/* ============ PRODUCT SHOWCASE — featured from DB ============ */}
       <FeaturedProducts />
+
+      {/* ============ VISUALIZER ============ */}
+      <section className="visualizer-cta" data-screen-label="05 Visualizer">
+        <div className="visualizer-cta__inner">
+          <Reveal>
+            <span className="t-eyebrow" style={{ color: "#fff" }}>
+              <span className="diamond">◆</span>Room Visualizer
+            </span>
+          </Reveal>
+          <h2>
+            <Reveal><span>Find the right flooring</span></Reveal>
+            <br />
+            <Reveal delay={0.08}><span>shade for your home.</span></Reveal>
+          </h2>
+          <FadeUp delay={0.14}>
+            <p className="visualizer-cta__sub">
+              Choose your desired product and see its visuals before you order.
+            </p>
+          </FadeUp>
+          <FadeUp delay={0.2}>
+            <Link href="/visualizer" className="tfi-pill tfi-pill--light">
+              <span className="arrow">↳</span>Try the visualizer
+            </Link>
+          </FadeUp>
+        </div>
+      </section>
 
       {/* ============ TESTIMONIALS — infinite marquee ============ */}
       <section className="testimonials" data-screen-label="04 Testimonials">
@@ -171,7 +143,7 @@ export default function HomePage() {
       <ShowroomScroll />
 
       {/* ============ APPROACH ============ */}
-      <section className="approach" data-screen-label="06 Approach">
+      <section className="approach" data-screen-label="07 Approach">
         <div className="approach__inner">
           <Reveal>
             <span className="t-eyebrow" style={{ color: "#fff" }}>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: { absolute: "Shop Premium Flooring & Wall Paneling Online UK | TFi Collections" },
+  title: { absolute: "Shop Premium Flooring & Wall Paneling Online UK | TFi Products" },
   description:
     "Shop TFi Floors and Interiors collections online — premium engineered oak flooring, acoustic and fluted wall panels, microcement, stone surfaces and bespoke kitchen finishes. Filter by brand, category and collection. UK-wide delivery from our Birmingham showroom.",
   keywords: [
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/products" },
   openGraph: {
-    title: "Shop Premium Flooring & Wall Paneling Online UK | TFi Collections",
+    title: "Shop Premium Flooring & Wall Paneling Online UK | TFi Products",
     description:
       "Engineered oak, acoustic wall panels, microcement and stone — premium UK flooring and paneling collections from TFi.",
     url: "/products",

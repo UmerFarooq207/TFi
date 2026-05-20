@@ -25,12 +25,20 @@ import { toStoredImageUrl } from "@/lib/image-url"
 import type { Product } from "@/lib/models/product"
 import { API_ERROR_MESSAGE } from "@/lib/api-errors"
 
-type FilterCategory = "all" | "flooring" | "wall-paneling" | "kitchen"
+type FilterCategory =
+  | "all"
+  | "flooring"
+  | "decorative-furniture-panel"
+  | "skirting"
+  | "decorative-wall-covering"
+  | "furniture-profile"
 
 const CATEGORY_LABELS: Record<string, string> = {
   flooring: "Flooring",
-  "wall-paneling": "Wall Paneling",
-  kitchen: "Kitchen",
+  "decorative-furniture-panel": "Decorative Furniture Panel",
+  skirting: "Laminate Flooring Accessories",
+  "decorative-wall-covering": "Decorative Wall Covering",
+  "furniture-profile": "Furniture Profile",
 }
 
 export default function AdminProductsPage() {
@@ -103,7 +111,7 @@ export default function AdminProductsPage() {
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white border border-border/40 px-4 py-3 mb-6">
         <Tabs value={category} onValueChange={(v) => setCategory(v as FilterCategory)}>
           <TabsList variant="line">
-            {(["all", "flooring", "wall-paneling", "kitchen"] as FilterCategory[]).map((c) => (
+            {(["all", "flooring", "decorative-furniture-panel", "skirting", "decorative-wall-covering", "furniture-profile"] as FilterCategory[]).map((c) => (
               <TabsTrigger key={c} value={c} className="text-[10px] tracking-[0.18em] uppercase">
                 {c === "all" ? "All" : CATEGORY_LABELS[c]}
               </TabsTrigger>

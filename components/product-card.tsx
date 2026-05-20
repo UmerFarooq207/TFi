@@ -9,8 +9,10 @@ import type { Product } from "@/lib/models/product"
 
 const CATEGORY_LABELS: Record<Product["category"], string> = {
   flooring: "Flooring",
-  "wall-paneling": "Wall Paneling",
-  kitchen: "Kitchen",
+  "decorative-furniture-panel": "Decorative Furniture Panel",
+  skirting: "Laminate Flooring Accessories",
+  "decorative-wall-covering": "Decorative Wall Covering",
+  "furniture-profile": "Furniture Profile",
 }
 
 interface ProductCardProps {

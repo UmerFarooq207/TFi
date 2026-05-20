@@ -28,7 +28,12 @@ export interface Product {
   name: string
   slug: string
   brand: string
-  category: "flooring" | "wall-paneling" | "kitchen"
+  category:
+    | "flooring"
+    | "decorative-furniture-panel"
+    | "skirting"
+    | "decorative-wall-covering"
+    | "furniture-profile"
   collection: string
   description: string
   price: number

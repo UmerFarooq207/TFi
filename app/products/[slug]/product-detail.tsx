@@ -13,6 +13,7 @@ import type { Product } from "@/lib/models/product"
 interface ProductDetailProps {
   product: Product
   related: Product[]
+  brandRelated: Product[]
 }
 
 type DimDisplay = "mm" | "in"
@@ -35,7 +36,7 @@ function fmtDim(valueMm: number, display: DimDisplay): string {
   return `${(valueMm / MM_PER_INCH).toFixed(2)} in`
 }
 
-export function ProductDetail({ product, related }: ProductDetailProps) {
+export function ProductDetail({ product, related, brandRelated }: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1)
   const [dimDisplay, setDimDisplay] = useState<DimDisplay>("mm")
   const [descExpanded, setDescExpanded] = useState(false)
@@ -57,6 +58,12 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
   const visibleDesc = !isLongDesc || descExpanded
     ? description
     : description.slice(0, DESCRIPTION_PREVIEW_CHARS).trimEnd() + "…"
+
+  // ====== Collection colours (siblings only — excludes the selected colour) ======
+  const collectionColors = useMemo(
+    () => [...related].sort((a, b) => a.name.localeCompare(b.name)),
+    [related]
+  )
 
   // ====== Pill chips ======
   const pillChips = useMemo(() => {
@@ -203,6 +210,15 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
         </section>
       )}
 
+      {/* ============ COLLECTION COLOURS ============ */}
+      {collectionColors.length > 0 && (
+        <CollectionCarousel
+          products={collectionColors}
+          secondary="color"
+          title={`${product.collection} Colours`}
+        />
+      )}
+
       {/* ============ TECHNICAL SPECIFICATIONS ============ */}
       <section className="pdv2-tech">
         <h2 className="pdv2-tech__title">TECHNICAL SPECIFICATIONS</h2>
@@ -309,12 +325,13 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
         </div>
       </section>
 
-      {/* ============ COLLECTION CAROUSEL ============ */}
-      <CollectionCarousel
-        products={related}
-        currentSlug={product.slug}
-        title="You may also like…"
-      />
+      {/* ============ YOU MAY ALSO LIKE (same brand, other collections) ============ */}
+      {brandRelated.length > 0 && (
+        <CollectionCarousel
+          products={brandRelated}
+          title="You may also like…"
+        />
+      )}
     </>
   )
 }

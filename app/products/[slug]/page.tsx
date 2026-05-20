@@ -8,8 +8,10 @@ const SITE_URL = "https://www.tfifloorsandinteriors.co.uk"
 
 const CATEGORY_LABEL: Record<Product["category"], string> = {
   flooring: "Flooring",
-  "wall-paneling": "Wall Paneling",
-  kitchen: "Kitchen",
+  "decorative-furniture-panel": "Decorative Furniture Panel",
+  skirting: "Laminate Flooring Accessories",
+  "decorative-wall-covering": "Decorative Wall Covering",
+  "furniture-profile": "Furniture Profile",
 }
 
 async function getProduct(slug: string): Promise<Product | null> {
@@ -26,6 +28,16 @@ async function getCollectionSiblings(collection: string, excludeSlug: string): P
   if (!res.ok) return []
   const products: Product[] = await res.json()
   return products.filter((p) => p.slug !== excludeSlug)
+}
+
+// Same brand, but from other collections — powers the "You may also like" slider.
+async function getBrandRelated(brand: string, collection: string, excludeSlug: string): Promise<Product[]> {
+  if (!brand) return []
+  const base = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000"
+  const res = await fetch(`${base}/api/products?brand=${encodeURIComponent(brand)}`, { cache: "no-store" })
+  if (!res.ok) return []
+  const products: Product[] = await res.json()
+  return products.filter((p) => p.slug !== excludeSlug && p.collection !== collection)
 }
 
 export async function generateMetadata({
@@ -103,7 +115,10 @@ export default async function ProductPage({
   const product = await getProduct(slug)
   if (!product) notFound()
 
-  const collectionSiblings = await getCollectionSiblings(product.collection, slug)
+  const [collectionSiblings, brandRelated] = await Promise.all([
+    getCollectionSiblings(product.collection, slug),
+    getBrandRelated(product.brand, product.collection, slug),
+  ])
 
   const categoryLabel = CATEGORY_LABEL[product.category] ?? "Interiors"
   const productImage = product.images?.[0] ? toStoredImageUrl(product.images[0]) : `${SITE_URL}/assets/TFI-nav-footer.png`
@@ -135,7 +150,7 @@ export default async function ProductPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
       />
-      <ProductDetail product={product} related={collectionSiblings} />
+      <ProductDetail product={product} related={collectionSiblings} brandRelated={brandRelated} />
     </>
   )
 }

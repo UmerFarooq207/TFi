@@ -11,11 +11,12 @@ interface Props {
   products: Product[]
   currentSlug?: string
   title?: string
+  secondary?: "price" | "color"
 }
 
 const fmtPrice = (n: number) => `£${n.toLocaleString("en-GB", { maximumFractionDigits: 0 })}`
 
-export function CollectionCarousel({ products, currentSlug, title = "You may also like…" }: Props) {
+export function CollectionCarousel({ products, currentSlug, title = "You may also like…", secondary = "price" }: Props) {
   const trackRef = useRef<HTMLDivElement | null>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -87,10 +88,14 @@ export function CollectionCarousel({ products, currentSlug, title = "You may als
                 </div>
                 <div className="cc__body">
                   <p className="cc__name">{p.name}</p>
-                  <p className="cc__price">
-                    {fmtPrice(p.price)}
-                    {p.unit && <span className="cc__unit"> / {p.unit}</span>}
-                  </p>
+                  {secondary === "color" ? (
+                    p.color && <p className="cc__price cc__color">{p.color}</p>
+                  ) : (
+                    <p className="cc__price">
+                      {fmtPrice(p.price)}
+                      {p.unit && <span className="cc__unit"> / {p.unit}</span>}
+                    </p>
+                  )}
                 </div>
               </Link>
             )

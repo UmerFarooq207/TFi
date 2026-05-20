@@ -59,11 +59,16 @@ export function HeroPin() {
             <TfiCartButton />
           </div>
         </div>
-        <h1 className="home-hero__title">
-          <Reveal><span>Elevating Interiors</span></Reveal>
-          <br />
-          <Reveal delay={0.12}><span>from the Ground Up.</span></Reveal>
-        </h1>
+        <div className="home-hero__headline">
+          <Link href="/products" className="tfi-pill tfi-pill--light">
+            <span className="arrow">↳</span>Shop Now
+          </Link>
+          <h1 className="home-hero__title">
+            <Reveal><span>Elevating Interiors</span></Reveal>
+            <br />
+            <Reveal delay={0.12}><span>from the Ground Up.</span></Reveal>
+          </h1>
+        </div>
       </section>
     )
   }
@@ -97,11 +102,16 @@ export function HeroPin() {
           </div>
         </div>
 
-        <motion.h1 className="hero-pin__title" style={{ y: titleY, opacity: titleOpacity }}>
-          <Reveal><span>Elevating Interiors</span></Reveal>
-          <br />
-          <Reveal delay={0.12}><span>from the Ground Up.</span></Reveal>
-        </motion.h1>
+        <motion.div className="hero-pin__headline" style={{ y: titleY, opacity: titleOpacity }}>
+          <Link href="/products" className="tfi-pill tfi-pill--light">
+            <span className="arrow">↳</span>Shop Now
+          </Link>
+          <h1 className="hero-pin__title">
+            <Reveal><span>Elevating Interiors</span></Reveal>
+            <br />
+            <Reveal delay={0.12}><span>from the Ground Up.</span></Reveal>
+          </h1>
+        </motion.div>
 
         <motion.div className="hero-pin__panel" style={{ opacity: panelOpacity, y: panelY }}>
           <div className="hero-pin__panel-row">

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { toast } from "sonner"
@@ -20,7 +20,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { toStoredImageUrl } from "@/lib/image-url"
 import type { Product } from "@/lib/models/product"
 import { API_ERROR_MESSAGE } from "@/lib/api-errors"
@@ -46,6 +52,7 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState<FilterCategory>("all")
+  const [collection, setCollection] = useState<string>("all")
   const [deletingSlug, setDeletingSlug] = useState<string | null>(null)
 
   async function fetchProducts() {
@@ -72,8 +79,17 @@ export default function AdminProductsPage() {
     setDeletingSlug(null)
   }
 
+  // Collections available within the current category (so the dropdown stays relevant)
+  const collectionsForCategory = useMemo(() => {
+    const base = category === "all" ? products : products.filter((p) => p.category === category)
+    return Array.from(new Set(base.map((p) => (p.collection ?? "").trim()).filter(Boolean))).sort((a, b) =>
+      a.localeCompare(b)
+    )
+  }, [products, category])
+
   const filtered = products.filter((p) => {
     const matchesCat = category === "all" || p.category === category
+    const matchesCollection = collection === "all" || (p.collection ?? "").trim() === collection
     const q = search.toLowerCase()
     const matchesSearch =
       !q ||
@@ -82,7 +98,7 @@ export default function AdminProductsPage() {
       (p.collection ?? "").toLowerCase().includes(q) ||
       (p.pattern ?? "").toLowerCase().includes(q) ||
       (p.color ?? "").toLowerCase().includes(q)
-    return matchesCat && matchesSearch
+    return matchesCat && matchesCollection && matchesSearch
   })
 
   const featuredCount = products.filter((p) => p.featured).length
@@ -108,24 +124,40 @@ export default function AdminProductsPage() {
       </header>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white border border-border/40 px-4 py-3 mb-6">
-        <Tabs value={category} onValueChange={(v) => setCategory(v as FilterCategory)}>
-          <TabsList variant="line">
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-white border border-border/40 px-4 py-3 mb-6">
+        <Select value={category} onValueChange={(v) => { setCategory(v as FilterCategory); setCollection("all") }}>
+          <SelectTrigger className="h-9 text-xs border-border/60 bg-card w-full sm:w-56">
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
             {(["all", "flooring", "decorative-furniture-panel", "skirting", "decorative-wall-covering", "furniture-profile"] as FilterCategory[]).map((c) => (
-              <TabsTrigger key={c} value={c} className="text-[10px] tracking-[0.18em] uppercase">
-                {c === "all" ? "All" : CATEGORY_LABELS[c]}
-              </TabsTrigger>
+              <SelectItem key={c} value={c}>
+                {c === "all" ? "All Categories" : CATEGORY_LABELS[c]}
+              </SelectItem>
             ))}
-          </TabsList>
-        </Tabs>
-        <div className="relative w-full sm:w-64">
-          <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, color, pattern…"
-            className="pl-8 h-9 text-xs border-border/60 bg-card"
-          />
+          </SelectContent>
+        </Select>
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <Select value={collection} onValueChange={setCollection}>
+            <SelectTrigger className="h-9 text-xs border-border/60 bg-card w-full sm:w-52">
+              <SelectValue placeholder="All Collections" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Collections</SelectItem>
+              {collectionsForCategory.map((c) => (
+                <SelectItem key={c} value={c}>{c}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="relative w-full sm:w-64">
+            <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name, color, pattern…"
+              className="pl-8 h-9 text-xs border-border/60 bg-card"
+            />
+          </div>
         </div>
       </div>
 
@@ -137,34 +169,40 @@ export default function AdminProductsPage() {
           ))}
         </div>
       ) : (
-        <div className="admin-table-shell overflow-x-auto">
-          <table className="admin-table w-full text-xs min-w-[920px]">
+        <>
+        <p className="text-[11px] text-muted-foreground/60 mb-3">
+          Showing <span className="font-medium text-foreground/80">{filtered.length}</span> of {products.length} products
+        </p>
+        <div className="admin-table-shell">
+          <table className="admin-table w-full text-xs">
             <thead>
               <tr>
-                <th className="text-left px-5 py-4">Product</th>
-                <th className="text-left px-5 py-4">Brand</th>
-                <th className="text-left px-5 py-4">Category</th>
-                <th className="text-left px-5 py-4">Collection</th>
-                <th className="text-left px-5 py-4">Price</th>
-                <th className="text-left px-5 py-4">Stock</th>
-                <th className="text-left px-5 py-4">Featured</th>
-                <th className="text-right px-5 py-4">Actions</th>
+                <th className="text-left px-3 py-3 w-10">#</th>
+                <th className="text-left px-3 py-3">Product</th>
+                <th className="text-left px-3 py-3">Brand</th>
+                <th className="text-left px-3 py-3">Category</th>
+                <th className="text-left px-3 py-3">Collection</th>
+                <th className="text-left px-3 py-3">Price</th>
+                <th className="text-left px-3 py-3">Stock</th>
+                <th className="text-left px-3 py-3">Featured</th>
+                <th className="text-right px-3 py-3">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-16 text-muted-foreground/40">
+                  <td colSpan={9} className="text-center py-16 text-muted-foreground/40">
                     No products found.
                   </td>
                 </tr>
               ) : (
-                filtered.map((product) => (
+                filtered.map((product, i) => (
                   <tr
                     key={String(product._id)}
                     className="border-t border-border/30 hover:bg-secondary/30 transition-colors"
                   >
-                    <td className="px-5 py-3.5">
+                    <td className="px-3 py-3 text-muted-foreground/50 tabular-nums">{i + 1}</td>
+                    <td className="px-3 py-3">
                       <div className="flex items-center gap-3">
                         <div className="relative w-11 h-11 shrink-0 bg-secondary overflow-hidden">
                           <Image
@@ -181,20 +219,20 @@ export default function AdminProductsPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-3.5 text-foreground/85">
+                    <td className="px-3 py-3 text-foreground/85">
                       {product.brand ?? "—"}
                     </td>
-                    <td className="px-5 py-3.5 text-muted-foreground">
+                    <td className="px-3 py-3 text-muted-foreground">
                       {CATEGORY_LABELS[product.category] ?? product.category}
                     </td>
-                    <td className="px-5 py-3.5 text-muted-foreground">
+                    <td className="px-3 py-3 text-muted-foreground">
                       {product.collection ?? "—"}
                     </td>
-                    <td className="px-5 py-3.5 text-foreground/85">
+                    <td className="px-3 py-3 text-foreground/85">
                       £{product.price.toLocaleString("en-GB")}
                       <span className="block text-[10px] text-muted-foreground/55">{product.unit}</span>
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-3 py-3">
                       <Badge
                         variant="outline"
                         className={`text-[9px] tracking-wider uppercase ${
@@ -206,7 +244,7 @@ export default function AdminProductsPage() {
                         {product.inStock ? "In Stock" : "Out of Stock"}
                       </Badge>
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-3 py-3">
                       {product.featured ? (
                         <span className="inline-flex items-center gap-1.5 text-[9px] tracking-[0.2em] uppercase text-foreground/85">
                           <Star size={10} className="fill-current" />
@@ -216,7 +254,7 @@ export default function AdminProductsPage() {
                         <span className="text-[9px] tracking-[0.2em] uppercase text-muted-foreground/40">—</span>
                       )}
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-3 py-3">
                       <div className="flex items-center justify-end gap-2">
                         <Button asChild variant="ghost" size="icon-sm">
                           <Link href={`/admin/products/${product.slug}/edit`}>
@@ -257,6 +295,7 @@ export default function AdminProductsPage() {
             </tbody>
           </table>
         </div>
+        </>
       )}
     </div>
   )

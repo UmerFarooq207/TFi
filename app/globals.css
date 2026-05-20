@@ -1073,7 +1073,7 @@ html.tfi-theme body {
 .bento {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 20px;
+  gap: 16px;
 }
 .bento-card {
   position: relative;
@@ -1104,7 +1104,7 @@ html.tfi-theme body {
 .bento-card .bc-body {
   position: absolute; inset: 0;
   display: flex; flex-direction: column; justify-content: space-between;
-  padding: 28px;
+  padding: 22px;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.05) 26%, rgba(0, 0, 0, 0.42) 58%, rgba(0, 0, 0, 0.86) 100%);
   color: #fff;
 }
@@ -1112,7 +1112,7 @@ html.tfi-theme body {
 .bento-card .bc-title {
   font-family: var(--font-inter-tight), var(--font-inter), Arial, sans-serif;
   font-weight: 500;
-  font-size: clamp(26px, 2.6vw, 38px);
+  font-size: clamp(20px, 2vw, 30px);
   line-height: 1.1; letter-spacing: -0.02em;
   margin: 0 0 6px;
   text-shadow: 0 1px 14px rgba(0, 0, 0, 0.55);
@@ -1143,10 +1143,10 @@ html.tfi-theme body {
   border-radius: 2px;
 }
 
-.bc-sm { grid-column: span 5; aspect-ratio: 8/7; }
-.bc-lg { grid-column: span 7; aspect-ratio: 16/10; }
-.bc-half-l, .bc-half-r { grid-column: span 6; aspect-ratio: 16/10; }
-.bc-full { grid-column: span 12; aspect-ratio: 21/8; }
+.bc-sm { grid-column: span 5; aspect-ratio: 10/7; }
+.bc-lg { grid-column: span 7; aspect-ratio: 2/1; }
+.bc-half-l, .bc-half-r { grid-column: span 6; aspect-ratio: 2/1; }
+.bc-full { grid-column: span 12; aspect-ratio: 16/5; }
 
 /* Brands — shop by brand */
 .brands {
@@ -1485,7 +1485,7 @@ html.tfi-theme body {
 @media (max-width: 900px) {
   .collection__intro, .products__head, .brands__intro { grid-template-columns: 1fr; }
   .brands__intro h2 { margin-bottom: 4px; }
-  .bc-sm, .bc-lg, .bc-half-l, .bc-half-r, .bc-full { grid-column: span 12; aspect-ratio: 4/3; }
+  .bc-sm, .bc-lg, .bc-half-l, .bc-half-r, .bc-full { grid-column: span 12; aspect-ratio: 16/10; }
   .product-grid { grid-template-columns: repeat(2, 1fr); gap: 18px 14px; }
   .testimonial { flex-basis: 280px; }
   .showroom__row { grid-template-columns: 1fr; gap: 24px; }

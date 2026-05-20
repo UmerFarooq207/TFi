@@ -173,8 +173,8 @@ export default function AdminProductsPage() {
         <p className="text-[11px] text-muted-foreground/60 mb-3">
           Showing <span className="font-medium text-foreground/80">{filtered.length}</span> of {products.length} products
         </p>
-        <div className="admin-table-shell">
-          <table className="admin-table w-full text-xs">
+        <div className="admin-table-shell overflow-x-auto">
+          <table className="admin-table w-full text-xs min-w-[880px]">
             <thead>
               <tr>
                 <th className="text-left px-3 py-3 w-10">#</th>

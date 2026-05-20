@@ -24,6 +24,7 @@ import {
   SidebarFooter,
   SidebarInset,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/components/auth-provider"
 import {
@@ -47,6 +48,7 @@ function AdminSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout } = useAuth()
+  const { setOpenMobile } = useSidebar()
   const [counts, setCounts] = useState({ newOrders: 0, newInquiries: 0 })
 
   const fetchCounts = useCallback(async () => {
@@ -79,6 +81,11 @@ function AdminSidebar() {
       window.removeEventListener(SEEN_EVENT, onSeen)
     }
   }, [fetchCounts, pathname])
+
+  // Collapse the mobile sidebar drawer whenever the route changes
+  useEffect(() => {
+    setOpenMobile(false)
+  }, [pathname, setOpenMobile])
 
   const handleLogout = async () => {
     await logout()

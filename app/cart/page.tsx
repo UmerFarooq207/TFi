@@ -144,7 +144,7 @@ export default function CartFlowPage() {
       })
       const json = await res.json().catch(() => null)
       if (!res.ok) {
-        setPromoError(API_ERROR_MESSAGE)
+        setPromoError(json?.error ?? API_ERROR_MESSAGE)
         setAppliedPromo(null)
       } else {
         setAppliedPromo({

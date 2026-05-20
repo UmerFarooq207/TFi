@@ -189,7 +189,7 @@ export default function AdminOrdersPage() {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white border border-border/40 px-4 py-3 mb-6">
-        <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterStatus)}>
+        <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterStatus)} className="hidden sm:block">
           <TabsList variant="line" className="flex-wrap">
             <TabsTrigger value="all" className="text-[10px] tracking-[0.18em] uppercase">All</TabsTrigger>
             {STATUS_OPTIONS.map((s) => (
@@ -197,6 +197,17 @@ export default function AdminOrdersPage() {
             ))}
           </TabsList>
         </Tabs>
+        <Select value={filter} onValueChange={(v) => setFilter(v as FilterStatus)}>
+          <SelectTrigger className="sm:hidden h-9 w-full text-xs border-border/60 bg-card capitalize">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            {STATUS_OPTIONS.map((s) => (
+              <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <div className="relative w-full sm:w-64">
           <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40" />
           <Input

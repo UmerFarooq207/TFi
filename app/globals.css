@@ -386,7 +386,7 @@ html.admin-theme body {
 .admin-table-shell {
   border: 1px solid var(--admin-border-subtle);
   background: #ffffff;
-  overflow: hidden;
+  overflow-x: auto;
 }
 .admin-table thead th {
   font-size: 9px;

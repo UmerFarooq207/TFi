@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useForm, useFieldArray } from "react-hook-form"
@@ -77,6 +77,7 @@ export function ProductForm({ product }: ProductFormProps) {
   const [uploading, setUploading] = useState(false)
   const [slugPreview, setSlugPreview] = useState(product?.slug ?? "")
   const [images, setImages] = useState<string[]>(product?.images ?? [])
+  const [allProducts, setAllProducts] = useState<Product[]>([])
   const isEditing = !!product
 
   const {
@@ -119,7 +120,7 @@ export function ProductForm({ product }: ProductFormProps) {
     },
   })
 
-  const { fields: specFields, append: addSpec, remove: removeSpec } = useFieldArray({
+  const { fields: specFields, append: addSpec, remove: removeSpec, replace: replaceSpecs } = useFieldArray({
     control,
     name: "specs",
   })
@@ -135,6 +136,49 @@ export function ProductForm({ product }: ProductFormProps) {
       )
     }
   }, [nameValue, isEditing])
+
+  // Load existing products so picking a known collection can prefill shared fields
+  useEffect(() => {
+    let active = true
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((data) => {
+        if (active && Array.isArray(data)) setAllProducts(data)
+      })
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const existingCollections = useMemo(
+    () =>
+      Array.from(new Set(allProducts.map((p) => (p.collection ?? "").trim()).filter(Boolean))).sort(
+        (a, b) => a.localeCompare(b)
+      ),
+    [allProducts]
+  )
+
+  // When an existing collection is selected, auto-fill dimensions / package / pallet / specs
+  // from a product in that collection. Runs once per collection so manual edits aren't clobbered.
+  const collectionValue = watch("collection")
+  const prefilledForRef = useRef((product?.collection ?? "").trim().toLowerCase())
+  useEffect(() => {
+    const key = (collectionValue ?? "").trim().toLowerCase()
+    if (!key || key === prefilledForRef.current) return
+    const source = allProducts.find(
+      (p) => (p.collection ?? "").trim().toLowerCase() === key && p.slug !== product?.slug
+    )
+    if (!source) return
+    prefilledForRef.current = key
+    if (source.dimensions) setValue("dimensions", source.dimensions)
+    if (source.package) setValue("package", source.package)
+    if (source.pallet) setValue("pallet", source.pallet)
+    replaceSpecs(source.specs ?? [])
+    toast.info(
+      `Prefilled dimensions, package, pallet & specs from the "${source.collection}" collection — edit as needed.`
+    )
+  }, [collectionValue, allProducts, product?.slug, setValue, replaceSpecs])
 
   async function uploadImage(file: File): Promise<string> {
     const formData = new FormData()
@@ -260,8 +304,16 @@ export function ProductForm({ product }: ProductFormProps) {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="collection" className="text-[10px] tracking-[0.22em] uppercase text-muted-foreground/70">Collection *</Label>
-            <Input id="collection" {...register("collection")} placeholder="Heritage, Calacatta Vein…" className="h-11 border-border/60 text-sm bg-card" />
+            <Input id="collection" list="admin-existing-collections" {...register("collection")} placeholder="Heritage, Calacatta Vein…" className="h-11 border-border/60 text-sm bg-card" />
+            <datalist id="admin-existing-collections">
+              {existingCollections.map((c) => (
+                <option key={c} value={c} />
+              ))}
+            </datalist>
             {errors.collection && <p className="text-xs text-destructive">{errors.collection.message}</p>}
+            <p className="text-[10px] text-muted-foreground/50 mt-1">
+              Pick an existing collection to auto-fill dimensions, package, pallet &amp; specs.
+            </p>
           </div>
         </div>
 
@@ -327,7 +379,7 @@ export function ProductForm({ product }: ProductFormProps) {
           <div className="space-y-1.5">
             <Label className="text-[10px] tracking-[0.22em] uppercase text-muted-foreground/70">Unit *</Label>
             <Select
-              defaultValue={product?.dimensions?.unit ?? "mm"}
+              value={watch("dimensions.unit")}
               onValueChange={(v) => setValue("dimensions.unit", v as "mm" | "cm" | "m" | "in")}
             >
               <SelectTrigger className="h-11 border-border/60 text-sm bg-card">
@@ -370,7 +422,7 @@ export function ProductForm({ product }: ProductFormProps) {
           <div className="space-y-1.5">
             <Label className="text-[10px] tracking-[0.22em] uppercase text-muted-foreground/70">Area Unit *</Label>
             <Select
-              defaultValue={product?.package?.areaUnit ?? "m²"}
+              value={watch("package.areaUnit")}
               onValueChange={(v) => setValue("package.areaUnit", v as "m²" | "ft²")}
             >
               <SelectTrigger className="h-11 border-border/60 text-sm bg-card">
@@ -392,7 +444,7 @@ export function ProductForm({ product }: ProductFormProps) {
           <div className="space-y-1.5">
             <Label className="text-[10px] tracking-[0.22em] uppercase text-muted-foreground/70">Weight Unit *</Label>
             <Select
-              defaultValue={product?.package?.weightUnit ?? "kg"}
+              value={watch("package.weightUnit")}
               onValueChange={(v) => setValue("package.weightUnit", v as "kg" | "lb")}
             >
               <SelectTrigger className="h-11 border-border/60 text-sm bg-card">
@@ -430,7 +482,7 @@ export function ProductForm({ product }: ProductFormProps) {
           <div className="space-y-1.5">
             <Label className="text-[10px] tracking-[0.22em] uppercase text-muted-foreground/70">Area Unit *</Label>
             <Select
-              defaultValue={product?.pallet?.areaUnit ?? "m²"}
+              value={watch("pallet.areaUnit")}
               onValueChange={(v) => setValue("pallet.areaUnit", v as "m²" | "ft²")}
             >
               <SelectTrigger className="h-11 border-border/60 text-sm bg-card">

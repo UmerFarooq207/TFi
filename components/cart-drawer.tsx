@@ -5,7 +5,7 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { AnimatePresence, motion } from "framer-motion"
 import { Minus, Plus, X } from "lucide-react"
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet"
 import { toStoredImageUrl } from "@/lib/image-url"
 import { useCartStore } from "@/store/cart"
 
@@ -34,6 +34,10 @@ export function CartDrawer() {
             <SheetTitle className="tfi-drawer__title">
               Cart {itemCount > 0 && <span className="tfi-drawer__count">· {itemCount}</span>}
             </SheetTitle>
+            {/* Required by Radix Dialog for screen readers; visually hidden. */}
+            <SheetDescription className="sr-only">
+              Your shopping cart. Review items and proceed to checkout.
+            </SheetDescription>
           </div>
           <button
             type="button"

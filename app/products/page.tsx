@@ -7,7 +7,6 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { motion, useReducedMotion } from "framer-motion"
 import { toast } from "sonner"
 import { Reveal, FadeUp, StaggerGroup, StaggerItem } from "@/components/reveal"
-import { TfiCartButton } from "@/components/tfi-cart-button"
 import { toStoredImageUrl } from "@/lib/image-url"
 import { useCartStore } from "@/store/cart"
 import type { Product } from "@/lib/models/product"
@@ -52,6 +51,7 @@ function ProductsInner() {
   const [brand, setBrand] = useState<string>(searchParams.get("brand") ?? "all")
   const [category, setCategory] = useState<Category>((searchParams.get("category") as Category) || "all")
   const [collection, setCollection] = useState<string>(searchParams.get("collection") ?? "all")
+  const [searchText, setSearchText] = useState<string>(searchParams.get("search") ?? "")
   const [color, setColor] = useState("all")
   const [pattern, setPattern] = useState("all")
   const [thickness, setThickness] = useState("all")
@@ -66,11 +66,14 @@ function ProductsInner() {
     setStock("all")
   }
 
-  // Sync from URL when query string changes externally
+  // Sync from URL when query string changes externally (e.g. header search → /products?search=…).
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     setBrand(searchParams.get("brand") ?? "all")
     setCategory((searchParams.get("category") as Category) || "all")
     setCollection(searchParams.get("collection") ?? "all")
+    setSearchText(searchParams.get("search") ?? "")
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [searchParams])
 
   const fetchProducts = useCallback(async () => {
@@ -82,6 +85,7 @@ function ProductsInner() {
   }, [])
 
   useEffect(() => {
+    /* eslint-disable-next-line react-hooks/set-state-in-effect */
     fetchProducts()
   }, [fetchProducts])
 
@@ -135,20 +139,24 @@ function ProductsInner() {
     return Array.from(map, ([name, image]) => ({ name, image }))
   }, [visibleByBrandAndCat])
 
-  // Push filter state to URL
+  // Push filter state to URL. `search` is preserved across other filter changes
+  // unless explicitly overridden, so users can refine results without losing
+  // their typed query.
   const pushUrl = useCallback(
-    (next: { brand?: string; category?: Category; collection?: string }) => {
+    (next: { brand?: string; category?: Category; collection?: string; search?: string }) => {
       const params = new URLSearchParams()
       const b = next.brand ?? brand
       const c = next.category ?? category
       const col = next.collection ?? collection
+      const s = next.search ?? searchText
       if (b !== "all") params.set("brand", b)
       if (c !== "all") params.set("category", c)
       if (col !== "all") params.set("collection", col)
+      if (s.trim()) params.set("search", s.trim())
       const qs = params.toString()
       router.push(qs ? `/products?${qs}` : "/products")
     },
-    [brand, category, collection, router]
+    [brand, category, collection, searchText, router]
   )
 
   const setBrandFilter = (b: string) => {
@@ -171,11 +179,13 @@ function ProductsInner() {
     setBrand("all")
     setCategory("all")
     setCollection("all")
+    setSearchText("")
     resetSecondary()
     router.push("/products")
   }
 
   const filtered = useMemo(() => {
+    const q = searchText.trim().toLowerCase()
     return visibleByBrandAndCat.filter((p) => {
       if (collection !== "all" && p.collection !== collection) return false
       if (color !== "all" && p.color !== color) return false
@@ -183,9 +193,18 @@ function ProductsInner() {
       if (thickness !== "all" && `${p.dimensions?.thickness} ${p.dimensions?.unit}` !== thickness) return false
       if (stock === "in" && !p.inStock) return false
       if (stock === "out" && p.inStock) return false
+      // Free-text search (driven by header search bar). Matches across the same
+      // fields the API regex-searches, so client-side filtering is consistent.
+      if (q) {
+        const hay = [p.name, p.brand, p.collection, p.color, p.pattern, p.description]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase()
+        if (!hay.includes(q)) return false
+      }
       return true
     })
-  }, [visibleByBrandAndCat, collection, color, pattern, thickness, stock])
+  }, [visibleByBrandAndCat, collection, color, pattern, thickness, stock, searchText])
 
   const sorted = useMemo(() => {
     const list = [...filtered]
@@ -196,23 +215,13 @@ function ProductsInner() {
   }, [filtered, sort])
 
   const total = sorted.length
-  const activeCount = [brand, category, collection, color, pattern, thickness, stock].filter(
-    (v) => v !== "all"
-  ).length
+  const activeCount =
+    [brand, category, collection, color, pattern, thickness, stock].filter((v) => v !== "all").length +
+    (searchText.trim() ? 1 : 0)
   const hasActiveFilter = activeCount > 0
 
   return (
     <>
-      <div className="tfi-topbar tfi-topbar--on-cream">
-        <span className="t-eyebrow">
-          <span className="diamond">◆</span>Products
-        </span>
-        <div className="tfi-topbar__right">
-          <Link href="/contact" className="tfi-link">↳ Get a quote</Link>
-          <TfiCartButton tone="ink" />
-        </div>
-      </div>
-
       {/* ============ HERO ============ */}
       <section className="col-hero">
         <FadeUp>

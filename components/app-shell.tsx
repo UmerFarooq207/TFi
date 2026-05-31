@@ -2,12 +2,22 @@
 
 import { useLayoutEffect } from "react"
 import { usePathname } from "next/navigation"
-import { TfiDock } from "@/components/tfi-dock"
 import { TfiFooter } from "@/components/tfi-footer"
 import { PageTransition } from "@/components/page-transition"
 import { CartDrawer } from "@/components/cart-drawer"
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+/**
+ * Top-level layout shell. Receives `header` as a prop so the server-rendered
+ * SiteHeader (async, fetches taxonomy) can be composed into this client wrapper.
+ * The header replaces the legacy TfiDock on public pages.
+ */
+export function AppShell({
+  children,
+  header,
+}: {
+  children: React.ReactNode
+  header?: React.ReactNode
+}) {
   const pathname = usePathname()
   const isAdmin = pathname.startsWith("/admin")
   const isAuthPage = pathname === "/login" || pathname === "/signup"
@@ -33,11 +43,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      {/* Visualizer is an immersive full-bleed experience — no header chrome. */}
+      {!isVisualizer && header}
       <main className="flex-1">
         <PageTransition>{children}</PageTransition>
       </main>
       {!isVisualizer && <TfiFooter />}
-      {!isVisualizer && <TfiDock />}
       <CartDrawer />
     </>
   )

@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { connectToDatabase } from "@/lib/mongodb"
 import type { Product } from "@/lib/models/product"
-import { Reveal, FadeUp, StaggerGroup, StaggerItem } from "@/components/reveal"
+import { Reveal, StaggerGroup, StaggerItem } from "@/components/reveal"
 
 type CategorySlug = Product["category"]
 
@@ -55,27 +55,57 @@ const CATEGORY_CARDS: {
   },
 ]
 
-async function getTopCollectionsByCategory(): Promise<Record<string, string[]>> {
+interface CategorySummary {
+  collections: string[]
+  /** Lowest priced product in the category (in £/m²). Null if none priced. */
+  priceFrom: number | null
+}
+
+/**
+ * Two independent aggregations — kept separate so the price floor isn't
+ * accidentally filtered out by the collection-name match. The collection
+ * tag list needs products with a non-empty collection; the price floor
+ * just needs `price > 0`, regardless of collection state.
+ */
+async function getCategorySummaries(): Promise<Record<string, CategorySummary>> {
   try {
     const { db } = await connectToDatabase()
-    const rows = await db
-      .collection<Product>("products")
-      .aggregate<{ _id: { category: string; collection: string }; count: number }>([
-        { $match: { collection: { $nin: [null, ""] } } },
-        { $group: { _id: { category: "$category", collection: "$collection" }, count: { $sum: 1 } } },
-        { $sort: { count: -1, "_id.collection": 1 } },
-      ])
-      .toArray()
 
-    const map: Record<string, string[]> = {}
-    for (const row of rows) {
+    const [collectionRows, priceRows] = await Promise.all([
+      db
+        .collection<Product>("products")
+        .aggregate<{ _id: { category: string; collection: string }; count: number }>([
+          { $match: { collection: { $nin: [null, ""] } } },
+          { $group: { _id: { category: "$category", collection: "$collection" }, count: { $sum: 1 } } },
+          { $sort: { count: -1, "_id.collection": 1 } },
+        ])
+        .toArray(),
+      db
+        .collection<Product>("products")
+        .aggregate<{ _id: string; priceFrom: number }>([
+          { $match: { price: { $gt: 0 } } },
+          { $group: { _id: "$category", priceFrom: { $min: "$price" } } },
+        ])
+        .toArray(),
+    ])
+
+    const map: Record<string, CategorySummary> = {}
+
+    for (const row of collectionRows) {
       const category = row._id.category
       const collection = row._id.collection
-      if (!map[category]) map[category] = []
-      if (map[category].length < 3 && !map[category].includes(collection)) {
-        map[category].push(collection)
+      if (!map[category]) map[category] = { collections: [], priceFrom: null }
+      if (map[category].collections.length < 3 && !map[category].collections.includes(collection)) {
+        map[category].collections.push(collection)
       }
     }
+
+    for (const row of priceRows) {
+      const category = row._id
+      if (!map[category]) map[category] = { collections: [], priceFrom: null }
+      map[category].priceFrom = row.priceFrom
+    }
+
     return map
   } catch {
     return {}
@@ -83,7 +113,7 @@ async function getTopCollectionsByCategory(): Promise<Record<string, string[]>> 
 }
 
 export async function CategoryShowcase() {
-  const topCollections = await getTopCollectionsByCategory()
+  const summaries = await getCategorySummaries()
 
   return (
     <section className="collection" data-screen-label="02 Categories">
@@ -96,22 +126,17 @@ export async function CategoryShowcase() {
       </div>
       <div className="collection__intro">
         <h2>
-          <Reveal><span>Premium Surfaces,</span></Reveal>
-          <br />
-          <Reveal delay={0.08}><span>From Floor to Ceiling.</span></Reveal>
+          <Reveal>
+            <span>Premium Surfaces, From Floor to Ceiling.</span>
+          </Reveal>
         </h2>
-        <FadeUp delay={0.15}>
-          <p>
-            Five premium categories built around the spaces they go into — flooring,
-            decorative furniture panels, laminate flooring accessories, wall coverings and furniture profiles,
-            specified for UK homes, studios and commercial fit-outs.
-          </p>
-        </FadeUp>
       </div>
 
       <StaggerGroup className="bento" stagger={0.09}>
         {CATEGORY_CARDS.map((card) => {
-          const tags = topCollections[card.slug] ?? []
+          const summary = summaries[card.slug]
+          const tags = summary?.collections ?? []
+          const priceFrom = summary?.priceFrom ?? null
           return (
             <StaggerItem key={card.slug} className={`bento-card ${card.size}`}>
               <Link href={`/products?category=${card.slug}`} className="bento-card__inner">
@@ -130,6 +155,30 @@ export async function CategoryShowcase() {
                       </div>
                     )}
                   </div>
+                </div>
+
+                {/* Always render the price tag so its placement is visible on every
+                    card. If no priced product exists in this category yet the value
+                    falls back to a "View range" prompt so the slot stays consistent. */}
+                <div
+                  className="bc-price"
+                  aria-label={
+                    priceFrom !== null
+                      ? `From £${priceFrom.toFixed(2)} per square metre`
+                      : `View ${card.title.toLowerCase()} range`
+                  }
+                >
+                  <span className="bc-price__label">From</span>
+                  <span className="bc-price__value">
+                    {priceFrom !== null ? (
+                      <>
+                        £{priceFrom.toFixed(2)}
+                        <span className="bc-price__unit">m²</span>
+                      </>
+                    ) : (
+                      "—"
+                    )}
+                  </span>
                 </div>
               </Link>
             </StaggerItem>

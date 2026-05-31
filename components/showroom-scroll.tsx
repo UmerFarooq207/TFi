@@ -24,7 +24,12 @@ export function ShowroomScroll() {
   const p = useSpring(scrollYProgress, { stiffness: 90, damping: 24, mass: 0.4 })
 
   const width = useTransform(p, [0, 0.7], ["min(900px, 78vw)", "100vw"])
-  const height = useTransform(p, [0, 0.7], ["min(54vh, 540px)", "100vh"])
+  // Stop expanding at the sticky stage's available height (viewport minus the
+  // 120px sticky main bar). Plain calc() — no CSS var — so framer-motion's
+  // interpolator can resolve start/end into the same unit space and tween
+  // smoothly. Using var() here breaks the curve. Keep this 120 in sync with
+  // --tfi-header-mainbar-h in tfi-extras.css.
+  const height = useTransform(p, [0, 0.7], ["min(54vh, 540px)", "calc(100vh - 120px)"])
   const radius = useTransform(p, [0, 0.7], [8, 0])
   const overlay = useTransform(p, [0, 0.45, 0.7], [0.55, 0.35, 0.55])
   const titleScrim = useTransform(p, [0, 0.3, 0.45], [0.45, 0.25, 0])

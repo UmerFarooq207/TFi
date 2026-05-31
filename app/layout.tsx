@@ -1,7 +1,8 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono, Playfair_Display, Inter, Inter_Tight } from "next/font/google"
 import "./globals.css"
 import { AppShell } from "@/components/app-shell"
+import { SiteHeader } from "@/components/site-header"
 import { Toaster } from "@/components/ui/sonner"
 import { AuthProvider } from "@/components/auth-provider"
 
@@ -34,6 +35,17 @@ const interTight = Inter_Tight({
 })
 
 const SITE_URL = "https://www.tfifloorsandinteriors.co.uk"
+
+/**
+ * Viewport meta — sets initial-scale to 1 so mobile browsers render the page
+ * at device-width pixels instead of the default ~980px desktop emulation
+ * (which scales everything down and forces the user to pinch-zoom).
+ */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -165,13 +177,16 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} ${inter.variable} ${interTight.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body
+        className="min-h-full flex flex-col bg-background text-foreground"
+        suppressHydrationWarning
+      >
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
         <AuthProvider>
-          <AppShell>{children}</AppShell>
+          <AppShell header={<SiteHeader />}>{children}</AppShell>
           <Toaster />
         </AuthProvider>
       </body>

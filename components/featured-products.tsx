@@ -34,9 +34,9 @@ export async function FeaturedProducts() {
       </div>
       <div className="products__head">
         <h2>
-          <Reveal><span>Pieces you can hold,</span></Reveal>
-          <br />
-          <Reveal delay={0.08}><span>order, and have on site.</span></Reveal>
+          <Reveal>
+            <span>Pieces you can hold, order, and have on site.</span>
+          </Reveal>
         </h2>
         <FadeUp delay={0.2}>
           <Link href="/products" className="tfi-pill">

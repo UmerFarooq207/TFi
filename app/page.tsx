@@ -2,7 +2,6 @@ import Link from "next/link"
 import { HomeExtras } from "@/components/home-extras"
 import { TestimonialsMarquee } from "@/components/testimonials-marquee"
 import { ShowroomScroll } from "@/components/showroom-scroll"
-import { HeroPin } from "@/components/hero-pin"
 import { Reveal, FadeUp, StaggerGroup, StaggerItem } from "@/components/reveal"
 import { FeaturedProducts } from "@/components/featured-products"
 import { CategoryShowcase } from "@/components/category-showcase"
@@ -54,11 +53,11 @@ const BRANDS = [
 export default function HomePage() {
   return (
     <>
-      {/* ============ HERO — pinned two-stage reveal ============ */}
-      <HeroPin />
-
       {/* ============ PRODUCT CATEGORIES (bento) ============ */}
       <CategoryShowcase />
+
+      {/* ============ PRODUCT SHOWCASE — featured from DB ============ */}
+      <FeaturedProducts />
 
       {/* ============ BRANDS ============ */}
       <section className="brands" data-screen-label="03 Brands">
@@ -92,9 +91,6 @@ export default function HomePage() {
           ))}
         </StaggerGroup>
       </section>
-
-      {/* ============ PRODUCT SHOWCASE — featured from DB ============ */}
-      <FeaturedProducts />
 
       {/* ============ VISUALIZER ============ */}
       <section className="visualizer-cta" data-screen-label="05 Visualizer">

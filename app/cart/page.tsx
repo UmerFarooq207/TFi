@@ -12,7 +12,6 @@ import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
 import { toStoredImageUrl } from "@/lib/image-url"
 import { useCartStore } from "@/store/cart"
-import { TfiCartButton } from "@/components/tfi-cart-button"
 import {
   quoteDelivery,
   isValidUkPostcode,
@@ -216,16 +215,6 @@ export default function CartFlowPage() {
 
   return (
     <>
-      <div className="tfi-topbar tfi-topbar--on-cream">
-        <span className="t-eyebrow">
-          <span className="diamond">◆</span>
-          {stage === "cart" ? "Your selection" : stage === "checkout" ? "Checkout" : "Payment"}
-        </span>
-        <div className="tfi-topbar__right">
-          <Link href="/products" className="tfi-link">↳ Continue shopping</Link>
-          <TfiCartButton tone="ink" />
-        </div>
-      </div>
 
       {/* ============ HERO + STEPPER ============ */}
       <section className="cart-hero">

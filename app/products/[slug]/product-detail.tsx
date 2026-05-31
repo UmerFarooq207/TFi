@@ -104,13 +104,6 @@ export function ProductDetail({ product, related, brandRelated }: ProductDetailP
 
   return (
     <>
-      <div className="tfi-topbar tfi-topbar--on-cream">
-        <span className="t-eyebrow">
-          <span className="diamond">◆</span>Product
-        </span>
-        <Link href="/contact" className="tfi-link">↳ Get a quote</Link>
-      </div>
-
       {/* ============ HERO BLOCK ============ */}
       <section className="pdv2-hero">
         <h2 className="pdv2-collection">{product.collection}</h2>

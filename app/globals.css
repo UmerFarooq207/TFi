@@ -1068,11 +1068,14 @@ html.tfi-theme body {
 .collection__intro h2 {
   font-family: var(--font-inter-tight), var(--font-inter), Arial, sans-serif;
   font-weight: 500;
-  font-size: clamp(32px, 4vw, 56px);
-  line-height: 1.05;
-  letter-spacing: -0.025em;
+  /* Smaller heading, single line. Removed the 16ch max-width so it doesn't
+     wrap; `white-space: nowrap` belt-and-braces against narrow flex parents. */
+  font-size: clamp(20px, 2.4vw, 32px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   margin: 12px 0 0;
-  max-width: 16ch;
+  max-width: none;
+  white-space: nowrap;
 }
 .collection__intro p { max-width: 360px; color: var(--tfi-mute); margin: 0; line-height: 1.55; }
 
@@ -1149,6 +1152,57 @@ html.tfi-theme body {
   border-radius: 2px;
 }
 
+/* "From £XX.XX m²" price tag — bottom-right of each bento card.
+   Backed by a soft dark pill so it stays legible against any image.
+   z-index well above bc-body's gradient so it always wins the paint order. */
+.bento-card .bc-price {
+  position: absolute !important;
+  right: clamp(14px, 2vw, 22px) !important;
+  bottom: clamp(14px, 2vw, 22px) !important;
+  z-index: 5 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 2px;
+  padding: 8px 14px;
+  background: rgba(14, 15, 16, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  color: #fff;
+  pointer-events: none;
+}
+.bento-card .bc-price__label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  opacity: 0.85;
+}
+.bento-card .bc-price__value {
+  font-family: var(--font-inter-tight), var(--font-inter), Arial, sans-serif;
+  font-size: clamp(18px, 2vw, 26px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  color: #fff;
+}
+.bento-card .bc-price__unit {
+  font-size: 0.55em;
+  font-weight: 600;
+  letter-spacing: 0;
+  margin-left: 2px;
+  opacity: 0.9;
+}
+@media (max-width: 540px) {
+  .bento-card .bc-price { padding: 6px 10px; }
+  .bento-card .bc-price__label { font-size: 10px; }
+  .bento-card .bc-price__value { font-size: 16px; }
+}
+
 .bc-sm { grid-column: span 5; aspect-ratio: 10/7; }
 .bc-lg { grid-column: span 7; aspect-ratio: 2/1; }
 .bc-half-l, .bc-half-r { grid-column: span 6; aspect-ratio: 2/1; }
@@ -1211,8 +1265,13 @@ html.tfi-theme body {
 .products__head h2 {
   font-family: var(--font-inter-tight), var(--font-inter), Arial, sans-serif;
   font-weight: 500;
-  font-size: clamp(28px, 3.2vw, 44px);
-  line-height: 1.05; letter-spacing: -0.025em; margin: 12px 0 0;
+  /* Smaller heading, single line — matches the categories section heading.
+     `white-space: nowrap` keeps it on one line if the grid column narrows. */
+  font-size: clamp(20px, 2.4vw, 32px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 12px 0 0;
+  white-space: nowrap;
 }
 
 .product-grid {
@@ -2384,9 +2443,16 @@ html.tfi-theme body {
 
   /* Home — bento, products, stats, approach */
   .collection { padding: 64px var(--tfi-px); }
-  .collection__intro h2 { font-size: clamp(28px, 8.5vw, 40px); }
+  .collection__intro h2 {
+    font-size: clamp(16px, 4.5vw, 22px);
+    /* Re-enable wrap on small screens — the full sentence won't fit on a phone. */
+    white-space: normal;
+  }
   .products { padding: 56px var(--tfi-px); }
-  .products__head h2 { font-size: clamp(28px, 8.5vw, 40px); }
+  .products__head h2 {
+    font-size: clamp(16px, 4.5vw, 22px);
+    white-space: normal; /* phones can wrap — the line is too long for narrow widths */
+  }
   .product-grid { grid-template-columns: 1fr 1fr; gap: 16px 12px; }
   .stats { grid-template-columns: 1fr 1fr; padding: 64px var(--tfi-px); }
   .stats .num { font-size: clamp(36px, 10vw, 60px); }

@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import { ContactForm } from "./contact-form"
-import Link from "next/link"
 
 export const metadata: Metadata = {
   title: { absolute: "Get in Touch — Birmingham Showroom & UK Enquiries | Contact TFi" },
@@ -29,13 +28,6 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <>
-      <div className="tfi-topbar tfi-topbar--on-cream">
-        <span className="t-eyebrow">
-          <span className="diamond">◆</span>Contact
-        </span>
-        <Link href="/calculator" className="tfi-link">↳ Estimate calculator</Link>
-      </div>
-
       <section className="ct">
         <h1>Get in Touch — Birmingham Showroom & UK Enquiries.</h1>
 

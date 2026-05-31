@@ -5,7 +5,6 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { Reveal, FadeUp, StaggerGroup, StaggerItem } from "@/components/reveal"
-import { TfiCartButton } from "@/components/tfi-cart-button"
 import { useCartStore } from "@/store/cart"
 import type { Product } from "@/lib/models/product"
 import {
@@ -164,16 +163,6 @@ export function Calculator() {
 
   return (
     <>
-      <div className="tfi-topbar tfi-topbar--on-cream">
-        <span className="t-eyebrow">
-          <span className="diamond">◆</span>Estimate calculator
-        </span>
-        <div className="tfi-topbar__right">
-          <Link href="/contact" className="tfi-link">↳ Get a quote</Link>
-          <TfiCartButton tone="ink" />
-        </div>
-      </div>
-
       {/* ============ HERO ============ */}
       <section className="est-hero">
         <FadeUp>

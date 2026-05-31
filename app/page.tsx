@@ -1,5 +1,4 @@
 import Link from "next/link"
-import { HomeExtras } from "@/components/home-extras"
 import { TestimonialsMarquee } from "@/components/testimonials-marquee"
 import { ShowroomScroll } from "@/components/showroom-scroll"
 import { Reveal, FadeUp, StaggerGroup, StaggerItem } from "@/components/reveal"
@@ -166,8 +165,6 @@ export default function HomePage() {
         <StaggerItem><div><div className="num">UK</div><div className="lbl">Birmingham showroom</div></div></StaggerItem>
         <StaggerItem><div><div className="num">Nationwide</div><div className="lbl">Delivery to addresses across the United Kingdom</div></div></StaggerItem>
       </StaggerGroup>
-
-      <HomeExtras />
     </>
   )
 }

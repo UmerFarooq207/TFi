@@ -151,14 +151,36 @@ export function SiteHeaderClient({ taxonomy }: { taxonomy: Taxonomy }) {
     return [...starts, ...contains].slice(0, 8)
   }, [allSuggestions, searchTerm])
 
-  // Compact-on-scroll. Collapse to mainbar-only the moment the page leaves
-  // scroll position 0. A class is set on <html> so CSS can target the topbar
-  // (sibling of the header) and the spacer (precedes both).
+  // Compact-on-scroll. Collapse to mainbar-only once the page is meaningfully
+  // scrolled. A class is set on <html> so CSS can target the topbar (sibling
+  // of the header) and the spacer (precedes both). Hysteresis (32px to engage,
+  // 8px to release) prevents a flicker if the user hovers right at the edge.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 0)
-    onScroll()
+    const ENGAGE = 32
+    const RELEASE = 8
+    let raf = 0
+    let engaged = false
+    const tick = () => {
+      raf = 0
+      const y = window.scrollY
+      if (!engaged && y > ENGAGE) {
+        engaged = true
+        setScrolled(true)
+      } else if (engaged && y < RELEASE) {
+        engaged = false
+        setScrolled(false)
+      }
+    }
+    const onScroll = () => {
+      if (raf) return
+      raf = window.requestAnimationFrame(tick)
+    }
+    tick()
     window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
+    return () => {
+      window.removeEventListener("scroll", onScroll)
+      if (raf) window.cancelAnimationFrame(raf)
+    }
   }, [])
 
   // Mirror `scrolled` onto <html> so global selectors can react. Cleaned up
@@ -178,6 +200,7 @@ export function SiteHeaderClient({ taxonomy }: { taxonomy: Taxonomy }) {
     setMobileSearchOpen(false)
     setSearchOpen(false)
     setActiveSuggestion(-1)
+    setSearchTerm("")
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [pathname])
 

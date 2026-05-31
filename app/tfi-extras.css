@@ -3190,21 +3190,36 @@
 }
 
 /* ───── Compact-on-scroll ─────
-   When the user scrolls past 60px, collapse the header to mainbar-only.
-   The .tfi-scrolled class is mirrored onto <html> by the React component so
-   we can reach the topbar (sibling of header) and the spacer (precedes both)
-   from a single ancestor selector. */
+   When the user scrolls past the engage threshold, collapse the header to
+   mainbar-only. The .tfi-scrolled class is mirrored onto <html> by the React
+   component so we can reach the topbar (sibling of header) and the spacer
+   (precedes both) from a single ancestor selector. Every animatable surface
+   uses the same duration/easing so the bars slide in lockstep. */
 .tfi-site-header,
 .tfi-site-topbar,
 .tfi-site-header-spacer {
-  transition: transform 300ms var(--tfi-ease),
-              top 300ms var(--tfi-ease),
-              height 300ms var(--tfi-ease);
+  transition: transform 360ms var(--tfi-ease),
+              top 360ms var(--tfi-ease),
+              height 360ms var(--tfi-ease);
+  will-change: transform, height, top;
 }
 
-/* Topbar slides up out of view. */
+/* Inner bars animate their own height/opacity/transform rather than vanishing
+   via `display: none` (which can't be transitioned and produced a snap). */
+.tfi-meganav,
+.tfi-trustbar {
+  overflow: hidden;
+  transform-origin: top center;
+  transition: height 360ms var(--tfi-ease),
+              opacity 240ms var(--tfi-ease),
+              transform 360ms var(--tfi-ease);
+  will-change: height, opacity, transform;
+}
+
+/* Topbar slides up out of view and fades. */
 html.tfi-scrolled .tfi-site-topbar {
   transform: translateY(-100%);
+  opacity: 0;
   pointer-events: none;
 }
 
@@ -3215,7 +3230,11 @@ html.tfi-scrolled .tfi-site-header {
 }
 html.tfi-scrolled .tfi-site-header .tfi-meganav,
 html.tfi-scrolled .tfi-site-header .tfi-trustbar {
-  display: none;
+  height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  border-top-color: transparent;
 }
 
 /* Spacer shrinks to match the now-compact header, so page content sits flush
@@ -3223,6 +3242,17 @@ html.tfi-scrolled .tfi-site-header .tfi-trustbar {
    `transition: height` smooths it. */
 html.tfi-scrolled .tfi-site-header-spacer {
   height: var(--tfi-header-mainbar-h);
+}
+
+/* Honour the user's motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  .tfi-site-header,
+  .tfi-site-topbar,
+  .tfi-site-header-spacer,
+  .tfi-meganav,
+  .tfi-trustbar {
+    transition: none;
+  }
 }
 
 /* Spacer height derives directly from the :root sizing tokens so any bar
